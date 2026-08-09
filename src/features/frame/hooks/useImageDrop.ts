@@ -21,7 +21,7 @@ function unsupportedMessage(mime: string): string {
   }
 
   const label = mime || 'this file type';
-  return `Itar frames images — \`${label}\` isn't supported. Try PNG, JPEG, WebP, AVIF or GIF.`;
+  return `Itar frames images — ${label} isn't supported. Try PNG, JPEG, WebP, AVIF or GIF.`;
 }
 
 function classifyDrag(dataTransfer: DataTransfer): {
@@ -92,6 +92,7 @@ export function useImageDrop() {
   const [intake, setIntake] = useState<ImageIntakeState>({ status: 'empty' });
   const depthRef = useRef(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const intakeGenerationRef = useRef(0);
   const intakeRef = useRef(intake);
 
   intakeRef.current = intake;
@@ -105,23 +106,40 @@ export function useImageDrop() {
 
   const intakeFile = useCallback(
     async (file: File) => {
+      const generation = intakeGenerationRef.current + 1;
+      intakeGenerationRef.current = generation;
+      const isStale = () => generation !== intakeGenerationRef.current;
+
       const verdict = classifyDropAsset(file.type);
       if (verdict !== 'accept') {
         closeCurrentBitmap();
+        if (isStale()) {
+          return;
+        }
         setIntake({ status: 'unsupported', mime: file.type });
         setLiveRegionMessage(unsupportedMessage(file.type));
         return;
       }
 
       closeCurrentBitmap();
+      if (isStale()) {
+        return;
+      }
       setIntake({ status: 'decoding' });
       setLiveRegionMessage('Decoding image.');
 
       try {
         const { bitmap, downscaled } = await decodeBitmap(file);
+        if (isStale()) {
+          bitmap.close();
+          return;
+        }
         setIntake({ status: 'ready', bitmap, downscaled });
         setLiveRegionMessage(downscaled ? `Image loaded. ${DOWNSCALE_NOTICE}` : 'Image loaded.');
       } catch {
+        if (isStale()) {
+          return;
+        }
         setIntake({ status: 'decode-failed', message: DECODE_FAILED_MESSAGE });
         setLiveRegionMessage(DECODE_FAILED_MESSAGE);
       }
