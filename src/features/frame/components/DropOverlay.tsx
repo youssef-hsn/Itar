@@ -59,17 +59,32 @@ export const DropOverlay = ({ dragState, rejectedMime }: DropOverlayProps) => {
     transition:
       'opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out)',
   };
+  const scrimStyle = isAccept
+    ? undefined
+    : {
+        backgroundColor: 'color-mix(in oklch, var(--status-danger) 16%, var(--ink-900) 84% / 0.45)',
+      };
+  const rejectPanelStyle = isAccept
+    ? panelFrameStyle
+    : {
+        ...panelFrameStyle,
+        backgroundColor: 'color-mix(in oklch, var(--status-danger) 6%, var(--white) 94%)',
+      };
 
   return (
     <div
-      className="pointer-events-none fixed inset-0 flex items-center justify-center bg-ink-900/40 p-6"
-      style={{ zIndex: 'var(--z-overlay, 40)', ...motionStyle }}
+      className={
+        isAccept
+          ? 'pointer-events-none fixed inset-0 flex items-center justify-center bg-ink-900/40 p-6'
+          : 'pointer-events-none fixed inset-0 flex items-center justify-center p-6'
+      }
+      style={{ zIndex: 'var(--z-overlay, 40)', ...motionStyle, ...scrimStyle }}
       aria-hidden="true"
     >
       <div
         className="w-full max-w-sm"
         style={{
-          ...panelFrameStyle,
+          ...rejectPanelStyle,
           ...motionStyle,
         }}
       >
@@ -82,7 +97,8 @@ export const DropOverlay = ({ dragState, rejectedMime }: DropOverlayProps) => {
           ) : (
             <>
               <AlertTriangle
-                className="size-8 text-ink-800"
+                className="size-8"
+                style={{ color: 'var(--status-danger)' }}
                 aria-hidden="true"
                 strokeWidth={1.75}
               />

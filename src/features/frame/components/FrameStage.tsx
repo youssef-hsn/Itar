@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import { cn } from '#/lib/utils.ts';
 import { frameCss } from '../frame.css.ts';
 import { frameGeometry } from '../frame.geometry.ts';
@@ -75,12 +75,15 @@ export const FrameStage = ({ frame, bitmap, isDecoding = false, className }: Fra
         }}
       >
         <div
-          style={{
-            width: composedSize.width,
-            height: composedSize.height,
-            transform: `scale(${scale})`,
-            transformOrigin: 'top left',
-          }}
+          style={
+            {
+              width: composedSize.width,
+              height: composedSize.height,
+              '--s': scale,
+              transform: 'scale(var(--s))',
+              transformOrigin: 'top left',
+            } as CSSProperties
+          }
         >
           <div style={frameStyle} className="inline-block">
             {bitmap ? (

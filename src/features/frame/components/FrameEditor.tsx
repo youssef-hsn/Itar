@@ -198,6 +198,18 @@ function FrameEditorInner() {
             </p>
           )}
 
+          {unsupportedMessage && (
+            <p className="type-label text-muted-foreground" role="status">
+              {unsupportedMessage}
+            </p>
+          )}
+
+          {decodeError && (
+            <p className="type-label text-muted-foreground" role="status">
+              {decodeError}
+            </p>
+          )}
+
           {downscaleNotice && (
             <p className="type-label text-muted-foreground" role="status">
               {downscaleNotice}
