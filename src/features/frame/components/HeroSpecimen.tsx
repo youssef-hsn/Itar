@@ -1,4 +1,4 @@
-import { type CSSProperties, useEffect, useRef, useState } from 'react';
+import { type CSSProperties, useEffect, useState } from 'react';
 import { cn } from '#/lib/utils.ts';
 import { decodeFrame } from '../frame.codec.ts';
 import { frameCss } from '../frame.css.ts';
@@ -12,11 +12,15 @@ const BOX_SIZE = { width: 400, height: 320 };
 const SPECIMEN_ALT =
   'Landscape specimen photograph of a framed subject with wide mat and stacked Arabic border strokes';
 
+type SpecimenStatus = 'pending' | 'loaded' | 'failed';
+
+function computeScale(composedSize: { width: number; height: number }) {
+  return Math.min(1, BOX_SIZE.width / composedSize.width, BOX_SIZE.height / composedSize.height);
+}
+
 export const HeroSpecimen = ({ className }: { className?: string }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
   const [frame, setFrame] = useState<Frame>(DEFAULT_FRAME);
-  const [imageFailed, setImageFailed] = useState(false);
-  const [scale, setScale] = useState(1);
+  const [specimenStatus, setSpecimenStatus] = useState<SpecimenStatus>('pending');
 
   useEffect(() => {
     const encoded = new URLSearchParams(window.location.search).get('f');
@@ -30,27 +34,17 @@ export const HeroSpecimen = ({ className }: { className?: string }) => {
     }
   }, []);
 
+  useEffect(() => {
+    const probe = new Image();
+    probe.onload = () => setSpecimenStatus('loaded');
+    probe.onerror = () => setSpecimenStatus('failed');
+    probe.src = SPECIMEN_PATH;
+  }, []);
+
   const geometry = frameGeometry(frame, SPECIMEN_SIZE);
   const { composedSize } = geometry;
   const frameStyle = frameCss(geometry);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) {
-      return;
-    }
-
-    const updateScale = () => {
-      const next = Math.min(
-        1,
-        BOX_SIZE.width / composedSize.width,
-        BOX_SIZE.height / composedSize.height,
-      );
-      setScale(next);
-    };
-
-    updateScale();
-  }, [composedSize.width, composedSize.height]);
+  const scale = computeScale(composedSize);
 
   return (
     <figure
@@ -58,7 +52,6 @@ export const HeroSpecimen = ({ className }: { className?: string }) => {
       aria-label="Example framed specimen"
     >
       <div
-        ref={containerRef}
         className="relative flex items-center justify-center"
         style={{ width: BOX_SIZE.width, height: BOX_SIZE.height }}
       >
@@ -80,7 +73,15 @@ export const HeroSpecimen = ({ className }: { className?: string }) => {
             }
           >
             <div style={frameStyle} className="inline-block">
-              {imageFailed ? (
+              {specimenStatus === 'loaded' ? (
+                <img
+                  src={SPECIMEN_PATH}
+                  alt={SPECIMEN_ALT}
+                  width={SPECIMEN_SIZE.width}
+                  height={SPECIMEN_SIZE.height}
+                  className="block max-w-none"
+                />
+              ) : (
                 <div
                   className="block"
                   style={{
@@ -89,15 +90,6 @@ export const HeroSpecimen = ({ className }: { className?: string }) => {
                     backgroundColor: frame.matColor,
                   }}
                   aria-hidden="true"
-                />
-              ) : (
-                <img
-                  src={SPECIMEN_PATH}
-                  alt={SPECIMEN_ALT}
-                  width={SPECIMEN_SIZE.width}
-                  height={SPECIMEN_SIZE.height}
-                  className="block max-w-none"
-                  onError={() => setImageFailed(true)}
                 />
               )}
             </div>
