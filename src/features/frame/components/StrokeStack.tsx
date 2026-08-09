@@ -1,7 +1,12 @@
 import { AlertTriangle, Plus } from 'lucide-react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { cn } from '#/lib/utils.ts';
 import type { Stroke } from '../frame.schema.ts';
-import { StrokeRow } from './StrokeRow.tsx';
+import { useAnchoredPopover } from '../hooks/useAnchoredPopover.ts';
+import { strokeDisplayName } from '../strokeLabel.ts';
+import { labelButtonClass } from './controlButton.ts';
+import { STROKE_NAME_FIELD_ID, StrokeEditorPopover } from './StrokeEditorPopover.tsx';
+import { StrokeSlab } from './StrokeSlab.tsx';
 
 type StrokeStackProps = {
   strokes: Stroke[];
@@ -24,25 +29,108 @@ export const StrokeStack = ({
   maxStrokesReached,
   className,
 }: StrokeStackProps) => {
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const slabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
+  const pendingFocusRef = useRef(false);
+
+  const { popoverRef, isOpen, position, open, close, setAnchor, reposition } = useAnchoredPopover(
+    `#${STROKE_NAME_FIELD_ID}`,
+  );
+
   const displayStrokes = [...strokes].reverse();
+  slabRefs.current.length = strokes.length;
+
+  useEffect(() => {
+    if (!isOpen) {
+      setEditingIndex(null);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (editingIndex !== null && editingIndex >= strokes.length) {
+      close();
+    }
+  }, [close, editingIndex, strokes.length]);
+
+  useLayoutEffect(() => {
+    if (editingIndex === null) {
+      return;
+    }
+    setAnchor(slabRefs.current[editingIndex] ?? null);
+    reposition();
+  }, [editingIndex, reposition, setAnchor]);
+
+  useLayoutEffect(() => {
+    if (!pendingFocusRef.current) {
+      return;
+    }
+    pendingFocusRef.current = false;
+    slabRefs.current[strokes.length - 1]?.focus();
+  }, [strokes.length]);
+
+  const handleOpen = useCallback(
+    (modelIndex: number, anchor: HTMLElement) => {
+      setEditingIndex(modelIndex);
+      open(anchor);
+    },
+    [open],
+  );
+
+  const handleAdd = useCallback(() => {
+    if (maxStrokesReached) {
+      return;
+    }
+    pendingFocusRef.current = true;
+    onAdd();
+  }, [maxStrokesReached, onAdd]);
+
+  const handleMove = useCallback(
+    (direction: 1 | -1) => {
+      if (editingIndex === null) {
+        return;
+      }
+      const target = editingIndex + direction;
+      if (target < 0 || target >= strokes.length) {
+        return;
+      }
+      onReorder(editingIndex, target);
+      setEditingIndex(target);
+    },
+    [editingIndex, onReorder, strokes.length],
+  );
+
+  const handleRemove = useCallback(() => {
+    if (editingIndex === null) {
+      return;
+    }
+    setAnchor(null);
+    close();
+    onRemove(editingIndex);
+    addButtonRef.current?.focus();
+  }, [close, editingIndex, onRemove, setAnchor]);
+
+  const editingStroke = editingIndex === null ? null : (strokes[editingIndex] ?? null);
+  const editingLabel =
+    editingIndex === null || editingStroke === null
+      ? 'stroke'
+      : strokeDisplayName(editingStroke, toModelIndex(editingIndex, strokes.length) + 1);
 
   return (
     <section className={cn('flex flex-col gap-4', className)} aria-labelledby="strokes-heading">
       <div className="flex items-center justify-between gap-3">
-        <h2 id="strokes-heading" className="type-label text-foreground">
-          Strokes
-        </h2>
+        <div className="flex flex-col">
+          <h2 id="strokes-heading" className="type-label text-foreground">
+            Strokes
+          </h2>
+          <p className="type-caption text-muted-foreground">Outermost first</p>
+        </div>
         <button
           type="button"
-          onClick={onAdd}
+          ref={addButtonRef}
+          onClick={handleAdd}
           disabled={maxStrokesReached}
-          className={cn(
-            'inline-flex min-h-11 items-center gap-2 rounded-sm border border-border bg-background px-3 type-label text-foreground',
-            'transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)]',
-            'hover:bg-muted',
-            'focus-visible:ring-ring',
-            'disabled:pointer-events-none disabled:opacity-40',
-          )}
+          className={labelButtonClass}
           aria-describedby={maxStrokesReached ? 'max-strokes-notice' : undefined}
         >
           <Plus className="size-4" aria-hidden="true" />
@@ -50,23 +138,24 @@ export const StrokeStack = ({
         </button>
       </div>
 
-      <ol className="list-none p-0 m-0" aria-label="Frame strokes, outermost first">
+      <ol
+        className="m-0 flex list-none flex-col gap-2 p-0"
+        aria-label="Frame strokes, outermost first"
+      >
         {displayStrokes.map((stroke, displayIndex) => {
           const modelIndex = toModelIndex(displayIndex, strokes.length);
-          const position = displayIndex + 1;
+          const label = strokeDisplayName(stroke, displayIndex + 1);
 
           return (
             <li key={modelIndex} className="list-none">
-              <StrokeRow
+              <StrokeSlab
                 stroke={stroke}
-                label={`Stroke ${position}`}
-                onUpdate={(patch) => onUpdate(modelIndex, patch)}
-                onMoveOutward={() => onReorder(modelIndex, modelIndex + 1)}
-                onMoveInward={() => onReorder(modelIndex, modelIndex - 1)}
-                onRemove={() => onRemove(modelIndex)}
-                canMoveOutward={modelIndex < strokes.length - 1}
-                canMoveInward={modelIndex > 0}
-                canRemove={strokes.length > 1}
+                label={label}
+                isEditing={editingIndex === modelIndex}
+                onOpen={(anchor) => handleOpen(modelIndex, anchor)}
+                buttonRef={(node) => {
+                  slabRefs.current[modelIndex] = node;
+                }}
               />
             </li>
           );
@@ -89,6 +178,25 @@ export const StrokeStack = ({
           </p>
         </div>
       )}
+
+      <StrokeEditorPopover
+        popoverRef={popoverRef}
+        position={position}
+        stroke={editingStroke}
+        label={editingLabel}
+        onUpdate={(patch) => {
+          if (editingIndex !== null) {
+            onUpdate(editingIndex, patch);
+          }
+        }}
+        onMoveOutward={() => handleMove(1)}
+        onMoveInward={() => handleMove(-1)}
+        onRemove={handleRemove}
+        onClose={close}
+        canMoveOutward={editingIndex !== null && editingIndex < strokes.length - 1}
+        canMoveInward={editingIndex !== null && editingIndex > 0}
+        canRemove={strokes.length > 1}
+      />
     </section>
   );
 };
