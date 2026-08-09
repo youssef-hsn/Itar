@@ -42,4 +42,46 @@ assert(
   'DEFAULT_FRAME codec should match brief example',
 );
 
+const namedFrame = {
+  padding: 24,
+  matColor: '#f7f4ec',
+  radius: 0,
+  strokes: [
+    { width: 16, color: '#1a3a3f', name: 'Outer band' },
+    { width: 4, color: '#c9a227' },
+    { width: 2, color: '#1a3a3f', name: 'Hair~line.!' },
+  ],
+};
+
+verifyRoundTrip('named frame', namedFrame);
+
+assert(encodeFrame(namedFrame).startsWith('2.'), 'named frames should encode as codec v2');
+
+assert(
+  decodeFrame('1.24.f7f4ec.0~16-1a3a3f~4-c9a227~2-1a3a3f') !== null,
+  'legacy v1 links should still decode',
+);
+
+assert(
+  decodeFrame('3.24.f7f4ec.0~16-1a3a3f') === null,
+  'unknown codec versions should be rejected',
+);
+
+const overlongName = {
+  ...DEFAULT_FRAME,
+  strokes: [{ width: 4, color: '#1a3a3f', name: 'x'.repeat(25) }],
+};
+
+assert(
+  decodeFrame(encodeFrame(overlongName)) === null,
+  'names longer than 24 characters should be rejected',
+);
+
+const decodedNames = decodeFrame(encodeFrame(namedFrame))?.strokes.map((stroke) => stroke.name);
+
+assert(
+  JSON.stringify(decodedNames) === JSON.stringify(['Outer band', undefined, 'Hair~line.!']),
+  'names should survive a codec round trip, delimiters included',
+);
+
 console.log('frame verify: ok');

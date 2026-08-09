@@ -4,9 +4,12 @@ const hexColor = z
   .string()
   .regex(/^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/, 'Expected #RRGGBB or #RRGGBBAA');
 
+export const MAX_STROKE_NAME_LENGTH = 24;
+
 export const strokeSchema = z.object({
   width: z.number().int().min(0).max(200),
   color: hexColor,
+  name: z.string().min(1).max(MAX_STROKE_NAME_LENGTH).optional(),
 });
 
 export const frameSchema = z.object({

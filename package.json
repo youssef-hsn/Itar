@@ -15,6 +15,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "verify": "node --experimental-strip-types scripts/verify-frame.ts",
     "typecheck": "tsc --noEmit",
     "format": "biome format --write .",
     "lint": "biome lint .",

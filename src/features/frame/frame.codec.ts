@@ -1,6 +1,7 @@
 import { type Frame, frameSchema } from './frame.schema.ts';
 
-const CODEC_VERSION = 1;
+const CODEC_VERSION_PLAIN = 1;
+const CODEC_VERSION_NAMED = 2;
 
 function encodeColor(color: string): string {
   return color.slice(1).toLowerCase();
@@ -13,8 +14,28 @@ function decodeColor(raw: string): string | null {
   return `#${raw.toLowerCase()}`;
 }
 
+function encodeName(name: string): string {
+  return encodeURIComponent(name).replace(
+    /[.~!]/g,
+    (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+}
+
+function decodeName(raw: string): string | null {
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return null;
+  }
+}
+
 function encodeStrokes(strokes: Frame['strokes']): string {
-  return strokes.map((stroke) => `${stroke.width}-${encodeColor(stroke.color)}`).join('~');
+  return strokes
+    .map((stroke) => {
+      const body = `${stroke.width}-${encodeColor(stroke.color)}`;
+      return stroke.name ? `${body}!${encodeName(stroke.name)}` : body;
+    })
+    .join('~');
 }
 
 function decodeStrokes(raw: string): Frame['strokes'] | null {
@@ -25,28 +46,45 @@ function decodeStrokes(raw: string): Frame['strokes'] | null {
   const strokes: Frame['strokes'] = [];
 
   for (const segment of raw.split('~')) {
-    const dash = segment.indexOf('-');
+    const bang = segment.indexOf('!');
+    const body = bang < 0 ? segment : segment.slice(0, bang);
+    const nameRaw = bang < 0 ? null : segment.slice(bang + 1);
+
+    const dash = body.indexOf('-');
     if (dash <= 0) {
       return null;
     }
 
-    const width = Number.parseInt(segment.slice(0, dash), 10);
-    const color = decodeColor(segment.slice(dash + 1));
+    const width = Number.parseInt(body.slice(0, dash), 10);
+    const color = decodeColor(body.slice(dash + 1));
 
     if (!Number.isInteger(width) || color === null) {
       return null;
     }
 
-    strokes.push({ width, color });
+    if (nameRaw === null) {
+      strokes.push({ width, color });
+      continue;
+    }
+
+    const name = decodeName(nameRaw);
+    if (name === null) {
+      return null;
+    }
+
+    strokes.push({ width, color, name });
   }
 
   return strokes;
 }
 
 export function encodeFrame(frame: Frame): string {
+  const version = frame.strokes.some((stroke) => stroke.name)
+    ? CODEC_VERSION_NAMED
+    : CODEC_VERSION_PLAIN;
   const matColor = encodeColor(frame.matColor);
   const strokes = encodeStrokes(frame.strokes);
-  return `${CODEC_VERSION}.${frame.padding}.${matColor}.${frame.radius}~${strokes}`;
+  return `${version}.${frame.padding}.${matColor}.${frame.radius}~${strokes}`;
 }
 
 export function decodeFrame(raw: string): Frame | null {
@@ -60,7 +98,11 @@ export function decodeFrame(raw: string): Frame | null {
   const padding = Number.parseInt(paddingRaw, 10);
   const matColor = decodeColor(matColorRaw);
 
-  if (version !== CODEC_VERSION || !Number.isInteger(padding) || matColor === null) {
+  if (
+    (version !== CODEC_VERSION_PLAIN && version !== CODEC_VERSION_NAMED) ||
+    !Number.isInteger(padding) ||
+    matColor === null
+  ) {
     return null;
   }
 
