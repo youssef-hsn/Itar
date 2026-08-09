@@ -1,0 +1,118 @@
+@import 'tailwindcss';
+
+@import './tokens/colors.css';
+@import './tokens/typography.css';
+@import './tokens/spacing.css';
+
+@theme inline {
+  --font-sans: var(--font-family-sans);
+
+  --color-teal-50: var(--teal-50);
+  --color-teal-100: var(--teal-100);
+  --color-teal-200: var(--teal-200);
+  --color-teal-300: var(--teal-300);
+  --color-teal-400: var(--teal-400);
+  --color-teal-500: var(--teal-500);
+  --color-teal-600: var(--teal-600);
+  --color-teal-700: var(--teal-700);
+  --color-teal-800: var(--teal-800);
+  --color-teal-900: var(--teal-900);
+
+  --color-ink-50: var(--ink-50);
+  --color-ink-100: var(--ink-100);
+  --color-ink-200: var(--ink-200);
+  --color-ink-300: var(--ink-300);
+  --color-ink-400: var(--ink-400);
+  --color-ink-500: var(--ink-500);
+  --color-ink-600: var(--ink-600);
+  --color-ink-700: var(--ink-700);
+  --color-ink-800: var(--ink-800);
+  --color-ink-900: var(--ink-900);
+
+  --color-white: var(--white);
+
+  --color-background: var(--surface-page);
+  --color-foreground: var(--text-body);
+  --color-primary: var(--brand-primary);
+  --color-primary-foreground: var(--text-on-brand);
+  --color-muted: var(--surface-sunken);
+  --color-muted-foreground: var(--text-muted);
+  --color-border: var(--border-subtle);
+  --color-ring: var(--brand-primary);
+
+  --radius-sm: var(--radius-control-sm);
+  --radius-md: var(--radius-control-md);
+  --radius-lg: var(--radius-control-lg);
+}
+
+@utility type-display {
+  font-family: var(--font-family-sans);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-display);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-display);
+  text-wrap: balance;
+}
+
+@utility type-headline {
+  font-family: var(--font-family-sans);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-headline);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-heading);
+  text-wrap: balance;
+}
+
+@utility type-title {
+  font-family: var(--font-family-sans);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-title);
+  line-height: var(--lh-snug);
+}
+
+@utility type-body {
+  font-family: var(--font-family-sans);
+  font-weight: var(--fw-regular);
+  font-size: var(--fs-body);
+  line-height: var(--lh-normal);
+  letter-spacing: var(--ls-body);
+  text-wrap: pretty;
+}
+
+@utility type-label {
+  font-family: var(--font-family-sans);
+  font-weight: var(--fw-medium);
+  font-size: var(--fs-label);
+  line-height: var(--lh-snug);
+}
+
+@layer base {
+  html {
+    font-family: var(--font-family-sans);
+    color: var(--text-body);
+    background-color: var(--surface-page);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    min-height: 100dvh;
+    margin: 0;
+  }
+
+  :focus-visible {
+    outline: none;
+    box-shadow: var(--ring-brand);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

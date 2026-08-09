@@ -1,0 +1,56 @@
+:root {
+  /* Oxidized teal — scarce accent (≤10% of any screen) */
+  --teal-50: oklch(0.97 0.02 195);
+  --teal-100: oklch(0.93 0.035 195);
+  --teal-200: oklch(0.87 0.05 195);
+  --teal-300: oklch(0.75 0.07 195);
+  --teal-400: oklch(0.62 0.085 195);
+  --teal-500: oklch(0.5 0.095 195);
+  --teal-600: oklch(0.43 0.09 195);
+  --teal-700: oklch(0.36 0.08 195);
+  --teal-800: oklch(0.28 0.06 195);
+  --teal-900: oklch(0.22 0.045 195);
+
+  /* Teal-tinted neutrals — not cream/sand */
+  --ink-50: oklch(0.985 0.006 195);
+  --ink-100: oklch(0.96 0.008 195);
+  --ink-200: oklch(0.91 0.01 195);
+  --ink-300: oklch(0.82 0.012 195);
+  --ink-400: oklch(0.68 0.014 195);
+  --ink-500: oklch(0.52 0.016 195);
+  --ink-600: oklch(0.42 0.017 195);
+  --ink-700: oklch(0.34 0.018 195);
+  --ink-800: oklch(0.26 0.019 195);
+  --ink-900: oklch(0.2 0.02 195);
+
+  --white: oklch(1 0 0);
+
+  --status-success: oklch(0.5 0.095 195);
+  --status-warning: oklch(0.72 0.14 75);
+  --status-danger: oklch(0.55 0.19 25);
+  --status-info: oklch(0.5 0.09 230);
+
+  --brand-primary: var(--teal-500);
+  --brand-primary-hover: var(--teal-600);
+  --brand-primary-active: var(--teal-700);
+  --brand-soft: var(--teal-50);
+  --brand-ink: var(--ink-900);
+
+  --text-strong: var(--ink-900);
+  --text-body: var(--ink-800);
+  --text-muted: var(--ink-700);
+  --text-subtle: var(--ink-600);
+  --text-on-brand: var(--white);
+  --text-link: var(--teal-700);
+
+  --surface-page: var(--ink-50);
+  --surface-panel: var(--white);
+  --surface-sunken: var(--ink-100);
+  --surface-brand: var(--teal-500);
+  --surface-brand-soft: var(--teal-50);
+
+  --border-subtle: var(--ink-200);
+  --border-default: var(--ink-300);
+  --border-strong: var(--ink-600);
+  --border-brand: var(--teal-500);
+}
