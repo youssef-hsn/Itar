@@ -24,4 +24,9 @@
   --ring-brand: 0 0 0 3px oklch(0.5 0.095 195 / 0.35);
 
   --container-max: 72rem;
+
+  --z-sticky: 10;
+  --z-dropdown: 20;
+  --z-overlay: 40;
+  --z-toast: 50;
 }

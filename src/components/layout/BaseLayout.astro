@@ -10,6 +10,8 @@ const {
   title = 'Itar',
   description = 'Instantly style and wrap images in customizable Arabic borders.',
 } = Astro.props;
+
+const ogImage = new URL('/specimen.jpg', Astro.url);
 ---
 
 <!doctype html>
@@ -19,6 +21,11 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={Astro.url.href} />
+    <meta property="og:image" content={ogImage.href} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />

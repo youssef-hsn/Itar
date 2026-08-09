@@ -82,13 +82,15 @@ Body text, page background, panel surfaces, and dividers. Chroma ~0.006–0.02 t
 | Label | `--fs-label` | 0.875rem | 500 |
 | Caption | `--fs-caption` | 0.75rem | 500 |
 
-Utilities: `type-display`, `type-headline`, `type-title`, `type-body`, `type-label`.
+Utilities: `type-display`, `type-headline`, `type-title`, `type-body`, `type-label`, `type-caption`.
 
 **The One Family Rule.** No serif/display pairing in the tool UI.
 
-## 4. Elevation
+## 4. Elevation & stacking
 
 Flat by default. Depth comes from subtle tonal shifts between page, panel, and field—not stacked shadows. Radii: `--radius-control-sm` 6px, `--radius-control-md` 10px, `--radius-control-lg` 14px.
+
+Semantic z-index (`spacing.css`): `--z-sticky` 10 · `--z-dropdown` 20 · `--z-overlay` 40 · `--z-toast` 50. Drag overlays and future toasts use these tokens; sticky editor rail stays below overlays.
 
 **The Flat-By-Default Rule.** Surfaces are flat at rest. If a shadow appears, it is a response to state (focus, open popover), never ambient decoration.
 
@@ -100,7 +102,18 @@ Flat by default. Depth comes from subtle tonal shifts between page, panel, and f
 
 ## 6. Components
 
-Shared layout: `src/components/layout/BaseLayout.astro`. Feature UI lives under `src/features/<feature>/`. Re-run `/impeccable document` as the framing UI lands.
+**Layout.** `BaseLayout.astro` — page shell, meta + Open Graph tags, Source Sans 3 loading. Props: `title`, `description`.
+
+**Index surface** (`src/pages/index.astro`) — static hero copy + two React islands:
+
+| Island | Role |
+| --- | --- |
+| `HeroSpecimen` | Read-only demo frame around `/specimen.jpg`; reads `?f=` once; mat-toned fallback on image error |
+| `FrameEditor` | Full editor: preview, controls, drop-anywhere intake, export |
+
+**FrameEditor** (`src/features/frame/components/FrameEditor.tsx`) — `NuqsAdapter` root. ≥1024px: dominant `FrameStage` left, sticky ~360px control rail right. Below breakpoint: stage then full-width panel. Rail order: Image → Presets → Mat → Strokes → Corner radius → Export. Window-level `DropOverlay` at `--z-overlay` for accept/reject drag feedback; polite live region for outcomes.
+
+**Control primitives** (frame feature): `ColorField`, `NumberField`, `StrokeRow` / `StrokeStack`, `MatControls`, `PresetPicker`, `ExportBar`. Touch targets ≥44px; lucide icons for actions.
 
 ## 7. Do's and Don'ts
 
