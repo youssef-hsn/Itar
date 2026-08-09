@@ -1,10 +1,32 @@
-import { AlertTriangle, Plus } from 'lucide-react';
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import {
+  type Announcements,
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  DragOverlay,
+  type DragStartEvent,
+  KeyboardSensor,
+  PointerSensor,
+  type ScreenReaderInstructions,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { AlertTriangle, GripVertical, Plus } from 'lucide-react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '#/lib/utils.ts';
 import type { Stroke } from '../frame.schema.ts';
 import { useAnchoredPopover } from '../hooks/useAnchoredPopover.ts';
+import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion.ts';
+import { useStrokeIds } from '../hooks/useStrokeIds.ts';
 import { strokeDisplayName } from '../strokeLabel.ts';
-import { labelButtonClass } from './controlButton.ts';
+import { dragHandleClass, labelButtonClass } from './controlButton.ts';
+import { SortableStrokeSlab } from './SortableStrokeSlab.tsx';
 import { STROKE_NAME_FIELD_ID, StrokeEditorPopover } from './StrokeEditorPopover.tsx';
 import { StrokeSlab } from './StrokeSlab.tsx';
 
@@ -19,6 +41,11 @@ type StrokeStackProps = {
 };
 
 const toModelIndex = (displayIndex: number, length: number) => length - 1 - displayIndex;
+
+const SCREEN_READER_INSTRUCTIONS: ScreenReaderInstructions = {
+  draggable:
+    'Press space or enter to pick up this stroke. Use the up and down arrow keys to move it, then press space or enter to drop it. Press escape to cancel.',
+};
 
 export const StrokeStack = ({
   strokes,
@@ -40,6 +67,73 @@ export const StrokeStack = ({
 
   const displayStrokes = [...strokes].reverse();
   slabRefs.current.length = strokes.length;
+
+  const { ids, reorderIds, removeId } = useStrokeIds(strokes.length);
+  const displayIds = useMemo(() => [...ids].reverse(), [ids]);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const labelForId = (id: string) => {
+    const displayIndex = displayIds.indexOf(id);
+    if (displayIndex < 0) {
+      return 'stroke';
+    }
+    return strokeDisplayName(displayStrokes[displayIndex], displayIndex + 1);
+  };
+
+  const positionForId = (id: string) => displayIds.indexOf(id) + 1;
+
+  const handleDragStart = useCallback(
+    (event: DragStartEvent) => {
+      close();
+      setActiveId(String(event.active.id));
+    },
+    [close],
+  );
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      setActiveId(null);
+      const { active, over } = event;
+      if (!over || active.id === over.id) {
+        return;
+      }
+
+      const fromDisplay = displayIds.indexOf(String(active.id));
+      const toDisplay = displayIds.indexOf(String(over.id));
+      if (fromDisplay < 0 || toDisplay < 0) {
+        return;
+      }
+
+      const fromIndex = toModelIndex(fromDisplay, strokes.length);
+      const toIndex = toModelIndex(toDisplay, strokes.length);
+      reorderIds(fromIndex, toIndex);
+      onReorder(fromIndex, toIndex);
+    },
+    [displayIds, onReorder, reorderIds, strokes.length],
+  );
+
+  const activeIndex = activeId === null ? -1 : displayIds.indexOf(activeId);
+  const activeStroke = activeIndex < 0 ? null : displayStrokes[activeIndex];
+
+  const announcements: Announcements = {
+    onDragStart: ({ active }) => `Picked up ${labelForId(String(active.id))}.`,
+    onDragOver: ({ over }) =>
+      over
+        ? `Now at position ${positionForId(String(over.id))} of ${strokes.length}, counting from the outside.`
+        : undefined,
+    onDragEnd: ({ active, over }) =>
+      over
+        ? `${labelForId(String(active.id))} dropped at position ${positionForId(String(over.id))} of ${strokes.length}.`
+        : `${labelForId(String(active.id))} returned to its place.`,
+    onDragCancel: ({ active }) =>
+      `Move cancelled. ${labelForId(String(active.id))} returned to its place.`,
+  };
 
   useEffect(() => {
     if (!isOpen) {
@@ -94,10 +188,11 @@ export const StrokeStack = ({
       if (target < 0 || target >= strokes.length) {
         return;
       }
+      reorderIds(editingIndex, target);
       onReorder(editingIndex, target);
       setEditingIndex(target);
     },
-    [editingIndex, onReorder, strokes.length],
+    [editingIndex, onReorder, reorderIds, strokes.length],
   );
 
   const handleRemove = useCallback(() => {
@@ -106,9 +201,10 @@ export const StrokeStack = ({
     }
     setAnchor(null);
     close();
+    removeId(editingIndex);
     onRemove(editingIndex);
     addButtonRef.current?.focus();
-  }, [close, editingIndex, onRemove, setAnchor]);
+  }, [close, editingIndex, onRemove, removeId, setAnchor]);
 
   const editingStroke = editingIndex === null ? null : (strokes[editingIndex] ?? null);
   const editingLabel =
@@ -138,29 +234,60 @@ export const StrokeStack = ({
         </button>
       </div>
 
-      <ol
-        className="m-0 flex list-none flex-col gap-2 p-0"
-        aria-label="Frame strokes, outermost first"
+      <DndContext
+        id="stroke-dnd"
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        modifiers={[restrictToVerticalAxis]}
+        accessibility={{ announcements, screenReaderInstructions: SCREEN_READER_INSTRUCTIONS }}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={() => setActiveId(null)}
       >
-        {displayStrokes.map((stroke, displayIndex) => {
-          const modelIndex = toModelIndex(displayIndex, strokes.length);
-          const label = strokeDisplayName(stroke, displayIndex + 1);
+        <SortableContext items={displayIds} strategy={verticalListSortingStrategy}>
+          <ol
+            className="m-0 flex list-none flex-col gap-2 p-0"
+            aria-label="Frame strokes, outermost first"
+          >
+            {displayStrokes.map((stroke, displayIndex) => {
+              const modelIndex = toModelIndex(displayIndex, strokes.length);
+              const id = displayIds[displayIndex];
 
-          return (
-            <li key={modelIndex} className="list-none">
-              <StrokeSlab
-                stroke={stroke}
-                label={label}
-                isEditing={editingIndex === modelIndex}
-                onOpen={(anchor) => handleOpen(modelIndex, anchor)}
-                buttonRef={(node) => {
-                  slabRefs.current[modelIndex] = node;
-                }}
-              />
-            </li>
-          );
-        })}
-      </ol>
+              return (
+                <li key={id} className="list-none">
+                  <SortableStrokeSlab
+                    id={id}
+                    stroke={stroke}
+                    label={strokeDisplayName(stroke, displayIndex + 1)}
+                    isEditing={editingIndex === modelIndex}
+                    onOpen={(anchor) => handleOpen(modelIndex, anchor)}
+                    buttonRef={(node) => {
+                      slabRefs.current[modelIndex] = node;
+                    }}
+                  />
+                </li>
+              );
+            })}
+          </ol>
+        </SortableContext>
+
+        <DragOverlay dropAnimation={prefersReducedMotion ? null : undefined}>
+          {activeStroke && (
+            <StrokeSlab
+              stroke={activeStroke}
+              label={strokeDisplayName(activeStroke, activeIndex + 1)}
+              isEditing={false}
+              onOpen={() => undefined}
+              isOverlay
+              handle={
+                <span className={dragHandleClass} aria-hidden="true">
+                  <GripVertical className="size-4" />
+                </span>
+              }
+            />
+          )}
+        </DragOverlay>
+      </DndContext>
 
       {maxStrokesReached && (
         <div
