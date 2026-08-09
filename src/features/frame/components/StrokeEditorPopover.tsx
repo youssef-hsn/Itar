@@ -22,6 +22,7 @@ type StrokeEditorPopoverProps = {
   canMoveOutward: boolean;
   canMoveInward: boolean;
   canRemove: boolean;
+  className?: string;
 };
 
 export const StrokeEditorPopover = ({
@@ -37,6 +38,7 @@ export const StrokeEditorPopover = ({
   canMoveOutward,
   canMoveInward,
   canRemove,
+  className,
 }: StrokeEditorPopoverProps) => {
   return (
     <div
@@ -56,6 +58,7 @@ export const StrokeEditorPopover = ({
         'w-[min(20rem,calc(100vw-1rem))] flex-col gap-4 rounded-md border border-border bg-white p-4',
         'shadow-[0_8px_24px_oklch(0.2_0.02_195/0.12)]',
         'open:flex',
+        className,
       )}
     >
       {stroke && (

@@ -12,6 +12,7 @@ type SortableStrokeSlabProps = {
   isEditing: boolean;
   onOpen: (anchor: HTMLElement) => void;
   buttonRef: (node: HTMLButtonElement | null) => void;
+  className?: string;
 };
 
 export const SortableStrokeSlab = ({
@@ -21,6 +22,7 @@ export const SortableStrokeSlab = ({
   isEditing,
   onOpen,
   buttonRef,
+  className,
 }: SortableStrokeSlabProps) => {
   const {
     attributes,
@@ -42,6 +44,7 @@ export const SortableStrokeSlab = ({
       slabRef={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       isDragging={isDragging}
+      className={className}
       handle={
         <button
           type="button"
