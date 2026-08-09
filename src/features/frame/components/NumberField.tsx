@@ -1,4 +1,4 @@
-import { type ChangeEvent, useId } from 'react';
+import { type ChangeEvent, useEffect, useId, useState } from 'react';
 import { cn } from '#/lib/utils.ts';
 
 type NumberFieldProps = {
@@ -26,17 +26,51 @@ export const NumberField = ({
 }: NumberFieldProps) => {
   const generatedId = useId();
   const fieldId = id ?? generatedId;
+  const [draft, setDraft] = useState(String(value));
+  const [inputFocused, setInputFocused] = useState(false);
+
+  useEffect(() => {
+    if (!inputFocused) {
+      setDraft(String(value));
+    }
+  }, [value, inputFocused]);
 
   const handleSliderChange = (event: ChangeEvent<HTMLInputElement>) => {
-    onChange(clamp(Number.parseInt(event.target.value, 10), min, max));
+    const next = clamp(Number.parseInt(event.target.value, 10), min, max);
+    onChange(next);
+    setDraft(String(next));
   };
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const parsed = Number.parseInt(event.target.value, 10);
-    if (Number.isNaN(parsed)) {
+    const raw = event.target.value;
+    setDraft(raw);
+    if (raw === '' || raw === '-') {
       return;
     }
-    onChange(clamp(parsed, min, max));
+    const parsed = Number.parseInt(raw, 10);
+    if (!Number.isNaN(parsed)) {
+      onChange(clamp(parsed, min, max));
+    }
+  };
+
+  const handleInputFocus = () => {
+    setInputFocused(true);
+  };
+
+  const handleInputBlur = () => {
+    setInputFocused(false);
+    if (draft === '' || draft === '-') {
+      setDraft(String(value));
+      return;
+    }
+    const parsed = Number.parseInt(draft, 10);
+    if (Number.isNaN(parsed)) {
+      setDraft(String(value));
+      return;
+    }
+    const clamped = clamp(parsed, min, max);
+    onChange(clamped);
+    setDraft(String(clamped));
   };
 
   return (
@@ -51,8 +85,10 @@ export const NumberField = ({
           min={min}
           max={max}
           step={step}
-          value={value}
+          value={draft}
           onChange={handleInputChange}
+          onFocus={handleInputFocus}
+          onBlur={handleInputBlur}
           className={cn(
             'type-label w-16 rounded-sm border border-border bg-background px-2 py-2 text-center text-foreground',
             'min-h-11 tabular-nums',

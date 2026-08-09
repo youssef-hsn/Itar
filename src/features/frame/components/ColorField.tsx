@@ -1,4 +1,4 @@
-import { type ChangeEvent, useId } from 'react';
+import { type ChangeEvent, useEffect, useId, useState } from 'react';
 import { cn } from '#/lib/utils.ts';
 
 type ColorFieldProps = {
@@ -29,26 +29,65 @@ const composeColor = (rgb: string, alphaPercent: number): string => {
 
 const isValidHex = (input: string): boolean => /^#[0-9a-fA-F]{6}$/.test(input);
 
+const normalizeHexDraft = (input: string): string => {
+  const trimmed = input.trim();
+  if (!trimmed) {
+    return '#';
+  }
+  return trimmed.startsWith('#') ? trimmed : `#${trimmed}`;
+};
+
 export const ColorField = ({ label, value, onChange, id, className }: ColorFieldProps) => {
   const generatedId = useId();
   const fieldId = id ?? generatedId;
   const { rgb, alpha } = parseColor(value);
+  const [hexDraft, setHexDraft] = useState(rgb);
+  const [hexFocused, setHexFocused] = useState(false);
 
-  const handlePickerChange = (event: ChangeEvent<HTMLInputElement>) => {
-    onChange(composeColor(event.target.value, alpha));
-  };
+  useEffect(() => {
+    if (!hexFocused) {
+      setHexDraft(rgb);
+    }
+  }, [rgb, hexFocused]);
 
-  const handleHexChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const input = event.target.value;
-    const normalized = input.startsWith('#') ? input : `#${input}`;
+  const commitHex = (draft: string) => {
+    const normalized = normalizeHexDraft(draft);
     if (isValidHex(normalized)) {
       onChange(composeColor(normalized, alpha));
     }
   };
 
+  const handlePickerChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const nextRgb = event.target.value;
+    onChange(composeColor(nextRgb, alpha));
+    setHexDraft(nextRgb.toUpperCase());
+  };
+
+  const handleHexChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const normalized = normalizeHexDraft(event.target.value);
+    setHexDraft(normalized.toUpperCase());
+    commitHex(normalized);
+  };
+
+  const handleHexFocus = () => {
+    setHexFocused(true);
+  };
+
+  const handleHexBlur = () => {
+    setHexFocused(false);
+    const normalized = normalizeHexDraft(hexDraft);
+    if (isValidHex(normalized)) {
+      onChange(composeColor(normalized, alpha));
+      setHexDraft(normalized.toUpperCase());
+      return;
+    }
+    setHexDraft(rgb);
+  };
+
   const handleAlphaChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextAlpha = Math.min(100, Math.max(0, Number.parseInt(event.target.value, 10) || 0));
-    onChange(composeColor(rgb, nextAlpha));
+    const baseRgb = isValidHex(hexDraft) ? hexDraft : rgb;
+    onChange(composeColor(baseRgb, nextAlpha));
   };
 
   return (
@@ -74,8 +113,10 @@ export const ColorField = ({ label, value, onChange, id, className }: ColorField
         <input
           id={fieldId}
           type="text"
-          value={rgb}
+          value={hexDraft}
           onChange={handleHexChange}
+          onFocus={handleHexFocus}
+          onBlur={handleHexBlur}
           spellCheck={false}
           autoComplete="off"
           className={cn(
