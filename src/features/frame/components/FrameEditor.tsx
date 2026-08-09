@@ -3,7 +3,7 @@ import { throttle } from 'nuqs';
 import { NuqsAdapter } from 'nuqs/adapters/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { cn } from '#/lib/utils.ts';
-import { exportPng, renderFrame } from '../frame.canvas.ts';
+import { EXPORT_DOWNSCALE_NOTICE, exportPng, renderFrame } from '../frame.canvas.ts';
 import { decodeFrame } from '../frame.codec.ts';
 import { PRESETS } from '../frame.schema.ts';
 import { useFrameState } from '../hooks/useFrameState.ts';
@@ -18,6 +18,7 @@ import { StrokeStack } from './StrokeStack.tsx';
 
 const INVALID_URL_MESSAGE = "That link's frame settings couldn't be read — showing the default.";
 const EXPORT_FAILED_MESSAGE = 'Export failed — try again.';
+const COPY_FAILED_MESSAGE = "Couldn't copy — check browser permissions.";
 
 function FrameEditorInner() {
   const {
@@ -51,7 +52,9 @@ function FrameEditorInner() {
   const [invalidUrlSettings, setInvalidUrlSettings] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [exportFailed, setExportFailed] = useState<string | null>(null);
+  const [exportDownscaleNotice, setExportDownscaleNotice] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [copyFailed, setCopyFailed] = useState<string | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -68,9 +71,13 @@ function FrameEditorInner() {
 
     setIsExporting(true);
     setExportFailed(null);
+    setExportDownscaleNotice(null);
 
     try {
-      const canvas = renderFrame(bitmap, frame);
+      const { canvas, downscaled } = renderFrame(bitmap, frame);
+      if (downscaled) {
+        setExportDownscaleNotice(EXPORT_DOWNSCALE_NOTICE);
+      }
       const blob = await exportPng(canvas);
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
@@ -86,12 +93,14 @@ function FrameEditorInner() {
   }, [bitmap, frame]);
 
   const handleCopyLink = useCallback(async () => {
+    setCopyFailed(null);
     try {
       await navigator.clipboard.writeText(window.location.href);
       setLinkCopied(true);
       window.setTimeout(() => setLinkCopied(false), 2000);
     } catch {
       setLinkCopied(false);
+      setCopyFailed(COPY_FAILED_MESSAGE);
     }
   }, []);
 
@@ -100,8 +109,14 @@ function FrameEditorInner() {
   }, [addStroke]);
 
   const liveMessage = useMemo(() => {
+    if (copyFailed) {
+      return copyFailed;
+    }
     if (exportFailed) {
       return exportFailed;
+    }
+    if (exportDownscaleNotice) {
+      return exportDownscaleNotice;
     }
     if (unsupportedMessage) {
       return unsupportedMessage;
@@ -110,7 +125,14 @@ function FrameEditorInner() {
       return decodeError;
     }
     return liveRegionMessage;
-  }, [decodeError, exportFailed, liveRegionMessage, unsupportedMessage]);
+  }, [
+    copyFailed,
+    decodeError,
+    exportDownscaleNotice,
+    exportFailed,
+    liveRegionMessage,
+    unsupportedMessage,
+  ]);
 
   const hasImage = bitmap !== null;
   const isDecoding = intake.status === 'decoding';
@@ -219,6 +241,18 @@ function FrameEditorInner() {
           {exportFailed && (
             <p className="type-label text-muted-foreground" role="status">
               {exportFailed}
+            </p>
+          )}
+
+          {exportDownscaleNotice && (
+            <p className="type-label text-muted-foreground" role="status">
+              {exportDownscaleNotice}
+            </p>
+          )}
+
+          {copyFailed && (
+            <p className="type-label text-muted-foreground" role="status">
+              {copyFailed}
             </p>
           )}
         </aside>

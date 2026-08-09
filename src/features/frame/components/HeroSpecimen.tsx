@@ -6,7 +6,7 @@ import { frameGeometry } from '../frame.geometry.ts';
 import { DEFAULT_FRAME, type Frame } from '../frame.schema.ts';
 
 const SPECIMEN_PATH = '/specimen.jpg';
-const SPECIMEN_SIZE = { width: 640, height: 480 };
+const FALLBACK_SIZE = { width: 640, height: 480 };
 const BOX_SIZE = { width: 400, height: 320 };
 
 const SPECIMEN_ALT =
@@ -21,6 +21,7 @@ function computeScale(composedSize: { width: number; height: number }) {
 export const HeroSpecimen = ({ className }: { className?: string }) => {
   const [frame, setFrame] = useState<Frame>(DEFAULT_FRAME);
   const [specimenStatus, setSpecimenStatus] = useState<SpecimenStatus>('pending');
+  const [imageSize, setImageSize] = useState(FALLBACK_SIZE);
 
   useEffect(() => {
     const encoded = new URLSearchParams(window.location.search).get('f');
@@ -36,12 +37,15 @@ export const HeroSpecimen = ({ className }: { className?: string }) => {
 
   useEffect(() => {
     const probe = new Image();
-    probe.onload = () => setSpecimenStatus('loaded');
+    probe.onload = () => {
+      setSpecimenStatus('loaded');
+      setImageSize({ width: probe.naturalWidth, height: probe.naturalHeight });
+    };
     probe.onerror = () => setSpecimenStatus('failed');
     probe.src = SPECIMEN_PATH;
   }, []);
 
-  const geometry = frameGeometry(frame, SPECIMEN_SIZE);
+  const geometry = frameGeometry(frame, imageSize);
   const { composedSize } = geometry;
   const frameStyle = frameCss(geometry);
   const scale = computeScale(composedSize);
@@ -77,16 +81,16 @@ export const HeroSpecimen = ({ className }: { className?: string }) => {
                 <img
                   src={SPECIMEN_PATH}
                   alt={SPECIMEN_ALT}
-                  width={SPECIMEN_SIZE.width}
-                  height={SPECIMEN_SIZE.height}
+                  width={imageSize.width}
+                  height={imageSize.height}
                   className="block max-w-none"
                 />
               ) : (
                 <div
                   className="block"
                   style={{
-                    width: SPECIMEN_SIZE.width,
-                    height: SPECIMEN_SIZE.height,
+                    width: imageSize.width,
+                    height: imageSize.height,
                     backgroundColor: frame.matColor,
                   }}
                   aria-hidden="true"

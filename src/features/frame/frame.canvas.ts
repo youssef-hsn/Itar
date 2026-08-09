@@ -2,6 +2,12 @@ import { frameGeometry } from './frame.geometry.ts';
 import type { Frame } from './frame.schema.ts';
 
 export const MAX_BITMAP_EDGE = 8192;
+export const EXPORT_DOWNSCALE_NOTICE = 'Export was scaled down to fit the 8192px limit.';
+
+export type RenderFrameResult = {
+  canvas: HTMLCanvasElement;
+  downscaled: boolean;
+};
 
 function parseAlpha(color: string): number {
   if (color.length === 9) {
@@ -31,16 +37,25 @@ function traceRoundedRect(
   ctx.closePath();
 }
 
-export function renderFrame(bitmap: ImageBitmap, frame: Frame): HTMLCanvasElement {
+export function renderFrame(bitmap: ImageBitmap, frame: Frame): RenderFrameResult {
   const imageSize = { width: bitmap.width, height: bitmap.height };
   const geometry = frameGeometry(frame, imageSize);
+  const { composedSize } = geometry;
+  const longestEdge = Math.max(composedSize.width, composedSize.height);
+  const scale = longestEdge > MAX_BITMAP_EDGE ? MAX_BITMAP_EDGE / longestEdge : 1;
+  const downscaled = scale < 1;
+
   const canvas = document.createElement('canvas');
-  canvas.width = geometry.composedSize.width;
-  canvas.height = geometry.composedSize.height;
+  canvas.width = Math.round(composedSize.width * scale);
+  canvas.height = Math.round(composedSize.height * scale);
 
   const ctx = canvas.getContext('2d');
   if (!ctx) {
     throw new Error('Canvas 2D context unavailable');
+  }
+
+  if (downscaled) {
+    ctx.scale(scale, scale);
   }
 
   const { matBox, totalThickness, matPadding, radius, matColor, rings } = geometry;
@@ -82,7 +97,7 @@ export function renderFrame(bitmap: ImageBitmap, frame: Frame): HTMLCanvasElemen
 
   ctx.drawImage(bitmap, matX + matPadding, matY + matPadding, imageSize.width, imageSize.height);
 
-  return canvas;
+  return { canvas, downscaled };
 }
 
 export function exportPng(canvas: HTMLCanvasElement): Promise<Blob> {
