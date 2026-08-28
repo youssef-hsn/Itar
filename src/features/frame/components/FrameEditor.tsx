@@ -1,8 +1,11 @@
 import { Image } from 'lucide-react';
 import { throttle } from 'nuqs';
 import { NuqsAdapter } from 'nuqs/adapters/react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { Alert, AlertDescription } from '#/components/ui/alert.tsx';
 import { Button } from '#/components/ui/button.tsx';
+import { Toaster } from '#/components/ui/sonner.tsx';
 import { cn } from '#/lib/utils.ts';
 import { EXPORT_DOWNSCALE_NOTICE, exportPng, renderFrame } from '../frame.canvas.ts';
 import { decodeFrame } from '../frame.codec.ts';
@@ -38,7 +41,6 @@ function FrameEditorInner() {
   const {
     dragState,
     rejectedMime,
-    liveRegionMessage,
     intake,
     bitmap,
     downscaleNotice,
@@ -64,6 +66,42 @@ function FrameEditorInner() {
       setInvalidUrlSettings(true);
     }
   }, []);
+
+  useEffect(() => {
+    if (unsupportedMessage) {
+      toast.error(unsupportedMessage);
+    }
+  }, [unsupportedMessage]);
+
+  useEffect(() => {
+    if (decodeError) {
+      toast.error(decodeError);
+    }
+  }, [decodeError]);
+
+  useEffect(() => {
+    if (downscaleNotice) {
+      toast.info(downscaleNotice);
+    }
+  }, [downscaleNotice]);
+
+  useEffect(() => {
+    if (exportFailed) {
+      toast.error(exportFailed);
+    }
+  }, [exportFailed]);
+
+  useEffect(() => {
+    if (exportDownscaleNotice) {
+      toast.info(exportDownscaleNotice);
+    }
+  }, [exportDownscaleNotice]);
+
+  useEffect(() => {
+    if (copyFailed) {
+      toast.error(copyFailed);
+    }
+  }, [copyFailed]);
 
   const handleDownload = useCallback(async () => {
     if (!bitmap) {
@@ -108,32 +146,6 @@ function FrameEditorInner() {
   const handleAddStroke = useCallback(() => {
     addStroke({ width: 4, color: '#1a3a3f' });
   }, [addStroke]);
-
-  const liveMessage = useMemo(() => {
-    if (copyFailed) {
-      return copyFailed;
-    }
-    if (exportFailed) {
-      return exportFailed;
-    }
-    if (exportDownscaleNotice) {
-      return exportDownscaleNotice;
-    }
-    if (unsupportedMessage) {
-      return unsupportedMessage;
-    }
-    if (decodeError) {
-      return decodeError;
-    }
-    return liveRegionMessage;
-  }, [
-    copyFailed,
-    decodeError,
-    exportDownscaleNotice,
-    exportFailed,
-    liveRegionMessage,
-    unsupportedMessage,
-  ]);
 
   const hasImage = bitmap !== null;
   const isDecoding = intake.status === 'decoding';
@@ -207,54 +219,15 @@ function FrameEditorInner() {
           />
 
           {invalidUrlSettings && (
-            <p className="type-label text-muted-foreground" role="status">
-              {INVALID_URL_MESSAGE}
-            </p>
-          )}
-
-          {unsupportedMessage && (
-            <p className="type-label text-muted-foreground" role="status">
-              {unsupportedMessage}
-            </p>
-          )}
-
-          {decodeError && (
-            <p className="type-label text-muted-foreground" role="status">
-              {decodeError}
-            </p>
-          )}
-
-          {downscaleNotice && (
-            <p className="type-label text-muted-foreground" role="status">
-              {downscaleNotice}
-            </p>
-          )}
-
-          {exportFailed && (
-            <p className="type-label text-muted-foreground" role="status">
-              {exportFailed}
-            </p>
-          )}
-
-          {exportDownscaleNotice && (
-            <p className="type-label text-muted-foreground" role="status">
-              {exportDownscaleNotice}
-            </p>
-          )}
-
-          {copyFailed && (
-            <p className="type-label text-muted-foreground" role="status">
-              {copyFailed}
-            </p>
+            <Alert role="status">
+              <AlertDescription>{INVALID_URL_MESSAGE}</AlertDescription>
+            </Alert>
           )}
         </aside>
       </div>
 
       <DropOverlay dragState={dragState} rejectedMime={rejectedMime} />
-
-      <div className="sr-only" aria-live="polite" aria-atomic="true">
-        {liveMessage}
-      </div>
+      <Toaster style={{ zIndex: 'var(--z-toast)' }} />
     </div>
   );
 }
