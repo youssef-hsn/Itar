@@ -93,6 +93,10 @@ export async function takeStashedImage(): Promise<File | null> {
         db.close();
         resolve(null);
       };
+      transaction.onabort = () => {
+        db.close();
+        resolve(null);
+      };
     } catch {
       db.close();
       resolve(null);
