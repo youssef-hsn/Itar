@@ -4,7 +4,7 @@ import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert.tsx';
 import { frameCss } from '../frame.css.ts';
 import { frameGeometry } from '../frame.geometry.ts';
 import type { Frame } from '../frame.schema.ts';
-import type { DragState } from '../hooks/useImageDrop.ts';
+import type { DragState } from '../hooks/useDropTarget.ts';
 
 type DropOverlayProps = {
   dragState: DragState;

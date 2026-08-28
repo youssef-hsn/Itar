@@ -1,8 +1,7 @@
 import { type ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { ACCEPTED_TYPES, classifyDropAsset } from '../dropAssets.ts';
 import { MAX_BITMAP_EDGE } from '../frame.canvas.ts';
-
-export type DragState = 'idle' | 'accept' | 'reject';
+import { useDropTarget } from './useDropTarget.ts';
 
 export type ImageIntakeState =
   | { status: 'empty' }
@@ -22,42 +21,6 @@ function unsupportedMessage(mime: string): string {
 
   const label = mime || 'this file type';
   return `Itar frames images — ${label} isn't supported. Try PNG, JPEG, WebP, AVIF or GIF.`;
-}
-
-function classifyDrag(dataTransfer: DataTransfer): {
-  state: DragState;
-  rejectedMime: string | null;
-} {
-  if (!dataTransfer.types.includes('Files')) {
-    return { state: 'idle', rejectedMime: null };
-  }
-
-  let hasAccept = false;
-  let hasReject = false;
-  let rejectedMime: string | null = null;
-
-  for (let index = 0; index < dataTransfer.items.length; index += 1) {
-    const type = dataTransfer.items[index]?.type ?? '';
-    const verdict = classifyDropAsset(type);
-    if (verdict === 'accept') {
-      hasAccept = true;
-    }
-    if (verdict === 'reject') {
-      hasReject = true;
-      if (!rejectedMime) {
-        rejectedMime = type;
-      }
-    }
-  }
-
-  if (hasAccept) {
-    return { state: 'accept', rejectedMime: null };
-  }
-  if (hasReject) {
-    return { state: 'reject', rejectedMime };
-  }
-
-  return { state: 'accept', rejectedMime: null };
 }
 
 async function decodeBitmap(source: Blob): Promise<{ bitmap: ImageBitmap; downscaled: boolean }> {
@@ -86,11 +49,8 @@ async function decodeBitmap(source: Blob): Promise<{ bitmap: ImageBitmap; downsc
 }
 
 export function useImageDrop() {
-  const [dragState, setDragState] = useState<DragState>('idle');
-  const [rejectedMime, setRejectedMime] = useState<string | null>(null);
   const [liveRegionMessage, setLiveRegionMessage] = useState('');
   const [intake, setIntake] = useState<ImageIntakeState>({ status: 'empty' });
-  const depthRef = useRef(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const intakeGenerationRef = useRef(0);
   const intakeRef = useRef(intake);
@@ -157,6 +117,10 @@ export function useImageDrop() {
     [intakeFile],
   );
 
+  const { dragState, rejectedMime } = useDropTarget({
+    onFiles: (files) => void intakeFiles(files),
+  });
+
   const triggerBrowse = useCallback(() => {
     inputRef.current?.click();
   }, []);
@@ -171,80 +135,6 @@ export function useImageDrop() {
     },
     [intakeFiles],
   );
-
-  useEffect(() => {
-    const onDragEnter = (event: DragEvent) => {
-      event.preventDefault();
-      depthRef.current += 1;
-      if (depthRef.current !== 1) {
-        return;
-      }
-      const { state, rejectedMime: mime } = classifyDrag(event.dataTransfer ?? new DataTransfer());
-      setDragState(state);
-      setRejectedMime(mime);
-    };
-
-    const onDragLeave = (event: DragEvent) => {
-      event.preventDefault();
-      depthRef.current = Math.max(0, depthRef.current - 1);
-      if (depthRef.current === 0) {
-        setDragState('idle');
-        setRejectedMime(null);
-      }
-    };
-
-    const onDragOver = (event: DragEvent) => {
-      event.preventDefault();
-      const { state, rejectedMime: mime } = classifyDrag(event.dataTransfer ?? new DataTransfer());
-      setDragState(state);
-      setRejectedMime(mime);
-    };
-
-    const onDrop = (event: DragEvent) => {
-      event.preventDefault();
-      depthRef.current = 0;
-      setDragState('idle');
-      setRejectedMime(null);
-      const files = event.dataTransfer?.files;
-      if (files) {
-        void intakeFiles(files);
-      }
-    };
-
-    const onPaste = (event: ClipboardEvent) => {
-      const items = event.clipboardData?.items;
-      if (!items) {
-        return;
-      }
-
-      for (let index = 0; index < items.length; index += 1) {
-        const item = items[index];
-        if (item?.kind !== 'file') {
-          continue;
-        }
-        const file = item.getAsFile();
-        if (file) {
-          event.preventDefault();
-          void intakeFile(file);
-          return;
-        }
-      }
-    };
-
-    window.addEventListener('dragenter', onDragEnter);
-    window.addEventListener('dragleave', onDragLeave);
-    window.addEventListener('dragover', onDragOver);
-    window.addEventListener('drop', onDrop);
-    window.addEventListener('paste', onPaste);
-
-    return () => {
-      window.removeEventListener('dragenter', onDragEnter);
-      window.removeEventListener('dragleave', onDragLeave);
-      window.removeEventListener('dragover', onDragOver);
-      window.removeEventListener('drop', onDrop);
-      window.removeEventListener('paste', onPaste);
-    };
-  }, [intakeFile, intakeFiles]);
 
   useEffect(() => {
     return () => {
