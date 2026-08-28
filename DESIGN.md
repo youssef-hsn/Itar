@@ -90,9 +90,9 @@ Utilities: `type-display`, `type-headline`, `type-title`, `type-body`, `type-lab
 
 Flat by default. Depth comes from subtle tonal shifts between page, panel, and field—not stacked shadows. Radii: `--radius-control-sm` 6px, `--radius-control-md` 10px, `--radius-control-lg` 14px.
 
-Semantic z-index (`spacing.css`): `--z-sticky` 10 · `--z-dropdown` 20 · `--z-overlay` 40 · `--z-toast` 50. Drag overlays and future toasts use these tokens; sticky editor rail stays below overlays.
+Semantic z-index (`spacing.css`): `--z-sticky` 10 · `--z-dropdown` 20 · `--z-overlay` 40 · `--z-toast` 50. Drag overlays and toasts use these tokens; sticky editor rail stays below overlays.
 
-Popovers use the native Popover API (`popover="auto"`), which renders in the browser's top layer — above every z-index token and outside any `overflow` clipping, such as the sticky editor rail. Their shadow (`0 8px 24px oklch(0.2 0.02 195 / 0.12)`) and a lifted drag item's (`0 8px 24px oklch(0.2 0.02 195 / 0.14)`) are the only shadows in the system, and both exist strictly as a response to state.
+Popovers portal to `document.body`, escaping the sticky editor rail's `overflow` clipping. Their shadow (`--shadow-popover`) and a lifted drag item's (`--shadow-lift`) are the only shadows in the system, and both exist strictly as a response to state.
 
 **The Flat-By-Default Rule.** Surfaces are flat at rest. If a shadow appears, it is a response to state (focus, open popover), never ambient decoration.
 
@@ -101,6 +101,7 @@ Popovers use the native Popover API (`popover="auto"`), which renders in the bro
 - `--dur-fast`: 120ms · `--dur-base`: 200ms · `--ease-out`: expo-style cubic-bezier
 - State changes only (hover, focus, loading)
 - `prefers-reduced-motion: reduce` collapses transitions globally in `global.css`
+- Generated entrance classes (`animate-in`, `zoom-in`) are stripped from all primitives, and `tw-animate-css` is intentionally omitted per the no-entrance-choreography rule.
 
 ## 6. Components
 
@@ -113,9 +114,11 @@ Popovers use the native Popover API (`popover="auto"`), which renders in the bro
 | `HeroSpecimen` | Read-only demo frame around `/specimen.jpg`; reads `?f=` once; mat-toned fallback on image error |
 | `FrameEditor` | Full editor: preview, controls, drop-anywhere intake, export |
 
-**FrameEditor** (`src/features/frame/components/FrameEditor.tsx`) — `NuqsAdapter` root. ≥1024px: dominant `FrameStage` left, sticky ~360px control rail right. Below breakpoint: stage then full-width panel. Rail order: Image → Presets → Mat → Strokes → Corner radius → Export. Window-level `DropOverlay` at `--z-overlay` for accept/reject drag feedback; polite live region for outcomes.
+**FrameEditor** (`src/features/frame/components/FrameEditor.tsx`) — `NuqsAdapter` root. ≥1024px: dominant `FrameStage` left, sticky ~360px control rail right. Below breakpoint: stage then full-width panel. Rail order: Image → Presets → Mat → Strokes → Corner radius → Export. Window-level `DropOverlay` at `--z-overlay` for accept/reject drag feedback; sonner toasts for transient feedback; inline `Alert` for invalid URL state.
 
-**Control primitives** (frame feature): `ColorField`, `NumberField`, `TextField`, `MatControls`, `PresetPicker`, `ExportBar`. Shared button classes live in `controlButton.ts` (`iconButtonClass`, `labelButtonClass`, `dragHandleClass`). Touch targets ≥44px; lucide icons for actions.
+**Control primitives** (`src/components/ui/`): `Button`, `Input`, `Label`, `Slider`, `Popover`, `Separator`, `Alert`, `DropdownMenu`, `Toaster` (Sonner). Retuned to Itar design tokens: `Button`'s default variant is `outline` and every size clears the 44px touch floor (`min-h-11` / `size-11`). Higher-level feature controls: `ColorField`, `NumberField`, `TextField`, `MatControls`, `PresetPicker`, `ExportBar`.
+
+**Theme.** Light and dark modes operate by flipping the semantic token aliases under `.dark`, leaving raw ink/teal ramps fixed. Switched via `ThemeToggle` in the layout header. `color-scheme: light/dark` ensures native inputs, color pickers, and scrollbars match the active theme.
 
 **Stroke stack** — the frame's stroke list renders as slabs, outermost first. A slab is one compact card: drag handle, a swatch whose bar height encodes the stroke's width over a checkerboard for transparency, the stroke name (custom or `Stroke N`), and a spec line (`4 px · 95%`, or `· gap` for a zero-alpha spacer). Clicking a slab opens `StrokeEditorPopover`, anchored beside the rail so `FrameStage` stays visible while editing name, width, colour, and alpha, and offering move and remove. Reordering is drag-and-drop (`@dnd-kit`, vertical axis only) with a keyboard path on the handle: Space to lift, arrows to move, Space to drop, Escape to cancel, all announced through a live region.
 

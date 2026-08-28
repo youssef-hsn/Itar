@@ -22,17 +22,23 @@ pnpm dev
 | `pnpm dev` | Dev server |
 | `pnpm build` | Production build to `./dist/` |
 | `pnpm preview` | Preview the build |
+| `pnpm verify` | Run verification test suites |
 | `pnpm typecheck` | Type-check with `tsc --noEmit` |
 | `pnpm check` | Biome check |
+| `pnpm lint` | Biome lint |
 | `pnpm format` | Format with Biome |
 
 ## Structure
 
 ```text
 src/
-├── components/layout/   # BaseLayout
-├── features/wip/        # WIP placeholder surface
-├── lib/                 # shared utils
+├── components/
+│   ├── layout/          # BaseLayout
+│   ├── theme/           # ThemeToggle and ThemeScript
+│   └── ui/              # Primitive component library
+├── features/
+│   └── frame/           # Frame editor feature and controls
+├── lib/                 # Shared utilities and theme store
 ├── pages/               # Astro routes
-└── styles/              # tokens + global CSS
+└── styles/              # Design tokens + global CSS
 ```
