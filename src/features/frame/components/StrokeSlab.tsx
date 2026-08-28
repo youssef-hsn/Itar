@@ -7,7 +7,7 @@ type StrokeSlabProps = {
   stroke: Stroke;
   label: string;
   isEditing: boolean;
-  onOpen: (anchor: HTMLElement) => void;
+  onOpen: () => void;
   buttonRef?: (node: HTMLButtonElement | null) => void;
   handle?: ReactNode;
   slabRef?: (node: HTMLDivElement | null) => void;
@@ -62,13 +62,13 @@ export const StrokeSlab = ({
       <button
         type="button"
         ref={buttonRef}
-        onClick={(event) => onOpen(event.currentTarget)}
+        onClick={onOpen}
         aria-haspopup="dialog"
         aria-expanded={isEditing}
         className={cn(
           'flex min-h-14 flex-1 items-center gap-3 px-3 py-2 text-left',
           'transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)]',
-          'hover:bg-muted focus-visible:ring-ring',
+          'hover:bg-muted',
         )}
       >
         <StrokeSwatch stroke={stroke} />

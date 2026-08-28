@@ -20,14 +20,14 @@ import {
 import { AlertTriangle, GripVertical, Plus } from 'lucide-react';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '#/components/ui/button.tsx';
+import { Popover } from '#/components/ui/popover.tsx';
 import { cn } from '#/lib/utils.ts';
 import type { Stroke } from '../frame.schema.ts';
-import { useAnchoredPopover } from '../hooks/useAnchoredPopover.ts';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion.ts';
 import { useStrokeIds } from '../hooks/useStrokeIds.ts';
 import { strokeDisplayName } from '../strokeLabel.ts';
 import { dragHandleClass, SortableStrokeSlab } from './SortableStrokeSlab.tsx';
-import { STROKE_NAME_FIELD_ID, StrokeEditorPopover } from './StrokeEditorPopover.tsx';
+import { StrokeEditorPopover } from './StrokeEditorPopover.tsx';
 import { StrokeSlab } from './StrokeSlab.tsx';
 
 type StrokeStackProps = {
@@ -57,16 +57,19 @@ export const StrokeStack = ({
   className,
 }: StrokeStackProps) => {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const closingIndexRef = useRef<number | null>(null);
   const slabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const pendingFocusRef = useRef(false);
 
-  const { popoverRef, isOpen, position, open, close, setAnchor, reposition } = useAnchoredPopover(
-    `#${STROKE_NAME_FIELD_ID}`,
-  );
-
   const displayStrokes = [...strokes].reverse();
   slabRefs.current.length = strokes.length;
+
+  useEffect(() => {
+    if (editingIndex !== null) {
+      closingIndexRef.current = editingIndex;
+    }
+  }, [editingIndex]);
 
   const { ids, reorderIds, removeId } = useStrokeIds(strokes.length);
   const displayIds = useMemo(() => [...ids].reverse(), [ids]);
@@ -88,13 +91,10 @@ export const StrokeStack = ({
 
   const positionForId = (id: string) => displayIds.indexOf(id) + 1;
 
-  const handleDragStart = useCallback(
-    (event: DragStartEvent) => {
-      close();
-      setActiveId(String(event.active.id));
-    },
-    [close],
-  );
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    setEditingIndex(null);
+    setActiveId(String(event.active.id));
+  }, []);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -136,24 +136,10 @@ export const StrokeStack = ({
   };
 
   useEffect(() => {
-    if (!isOpen) {
+    if (editingIndex !== null && editingIndex >= strokes.length) {
       setEditingIndex(null);
     }
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (editingIndex !== null && editingIndex >= strokes.length) {
-      close();
-    }
-  }, [close, editingIndex, strokes.length]);
-
-  useLayoutEffect(() => {
-    if (editingIndex === null) {
-      return;
-    }
-    setAnchor(slabRefs.current[editingIndex] ?? null);
-    reposition();
-  }, [editingIndex, reposition, setAnchor]);
+  }, [editingIndex, strokes.length]);
 
   useLayoutEffect(() => {
     if (!pendingFocusRef.current) {
@@ -163,13 +149,9 @@ export const StrokeStack = ({
     slabRefs.current[strokes.length - 1]?.focus();
   }, [strokes.length]);
 
-  const handleOpen = useCallback(
-    (modelIndex: number, anchor: HTMLElement) => {
-      setEditingIndex(modelIndex);
-      open(anchor);
-    },
-    [open],
-  );
+  const handleOpen = useCallback((modelIndex: number) => {
+    setEditingIndex(modelIndex);
+  }, []);
 
   const handleAdd = useCallback(() => {
     if (maxStrokesReached) {
@@ -199,12 +181,12 @@ export const StrokeStack = ({
     if (editingIndex === null) {
       return;
     }
-    setAnchor(null);
-    close();
-    removeId(editingIndex);
-    onRemove(editingIndex);
+    const idx = editingIndex;
+    setEditingIndex(null);
+    removeId(idx);
+    onRemove(idx);
     addButtonRef.current?.focus();
-  }, [close, editingIndex, onRemove, removeId, setAnchor]);
+  }, [editingIndex, onRemove, removeId]);
 
   const editingStroke = editingIndex === null ? null : (strokes[editingIndex] ?? null);
   const editingLabel =
@@ -232,60 +214,90 @@ export const StrokeStack = ({
         </Button>
       </div>
 
-      <DndContext
-        id="stroke-dnd"
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        modifiers={[restrictToVerticalAxis]}
-        accessibility={{ announcements, screenReaderInstructions: SCREEN_READER_INSTRUCTIONS }}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        onDragCancel={() => setActiveId(null)}
+      <Popover
+        open={editingIndex !== null}
+        onOpenChange={(next) => {
+          if (!next) {
+            setEditingIndex(null);
+          }
+        }}
       >
-        <SortableContext items={displayIds} strategy={verticalListSortingStrategy}>
-          <ol
-            className="m-0 flex list-none flex-col gap-2 p-0"
-            aria-label="Frame strokes, outermost first"
-          >
-            {displayStrokes.map((stroke, displayIndex) => {
-              const modelIndex = toModelIndex(displayIndex, strokes.length);
-              const id = displayIds[displayIndex];
+        <DndContext
+          id="stroke-dnd"
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          modifiers={[restrictToVerticalAxis]}
+          accessibility={{ announcements, screenReaderInstructions: SCREEN_READER_INSTRUCTIONS }}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={() => setActiveId(null)}
+        >
+          <SortableContext items={displayIds} strategy={verticalListSortingStrategy}>
+            <ol
+              className="m-0 flex list-none flex-col gap-2 p-0"
+              aria-label="Frame strokes, outermost first"
+            >
+              {displayStrokes.map((stroke, displayIndex) => {
+                const modelIndex = toModelIndex(displayIndex, strokes.length);
+                const id = displayIds[displayIndex];
 
-              return (
-                <li key={id} className="list-none">
-                  <SortableStrokeSlab
-                    id={id}
-                    stroke={stroke}
-                    label={strokeDisplayName(stroke, displayIndex + 1)}
-                    isEditing={editingIndex === modelIndex}
-                    onOpen={(anchor) => handleOpen(modelIndex, anchor)}
-                    buttonRef={(node) => {
-                      slabRefs.current[modelIndex] = node;
-                    }}
-                  />
-                </li>
-              );
-            })}
-          </ol>
-        </SortableContext>
+                return (
+                  <li key={id} className="list-none">
+                    <SortableStrokeSlab
+                      id={id}
+                      stroke={stroke}
+                      label={strokeDisplayName(stroke, displayIndex + 1)}
+                      isEditing={editingIndex === modelIndex}
+                      onOpen={() => handleOpen(modelIndex)}
+                      buttonRef={(node) => {
+                        slabRefs.current[modelIndex] = node;
+                      }}
+                    />
+                  </li>
+                );
+              })}
+            </ol>
+          </SortableContext>
 
-        <DragOverlay dropAnimation={prefersReducedMotion ? null : undefined}>
-          {activeStroke && (
-            <StrokeSlab
-              stroke={activeStroke}
-              label={strokeDisplayName(activeStroke, activeIndex + 1)}
-              isEditing={false}
-              onOpen={() => undefined}
-              isOverlay
-              handle={
-                <span className={dragHandleClass} aria-hidden="true">
-                  <GripVertical className="size-4" />
-                </span>
-              }
-            />
-          )}
-        </DragOverlay>
-      </DndContext>
+          <DragOverlay dropAnimation={prefersReducedMotion ? null : undefined}>
+            {activeStroke && (
+              <StrokeSlab
+                stroke={activeStroke}
+                label={strokeDisplayName(activeStroke, activeIndex + 1)}
+                isEditing={false}
+                onOpen={() => undefined}
+                isOverlay
+                handle={
+                  <span className={dragHandleClass} aria-hidden="true">
+                    <GripVertical className="size-4" />
+                  </span>
+                }
+              />
+            )}
+          </DragOverlay>
+        </DndContext>
+
+        <StrokeEditorPopover
+          anchor={editingIndex !== null ? slabRefs.current[editingIndex] : null}
+          stroke={editingStroke}
+          label={editingLabel}
+          onUpdate={(patch) => {
+            if (editingIndex !== null) {
+              onUpdate(editingIndex, patch);
+            }
+          }}
+          onMoveOutward={() => handleMove(1)}
+          onMoveInward={() => handleMove(-1)}
+          onRemove={handleRemove}
+          onClose={() => setEditingIndex(null)}
+          canMoveOutward={editingIndex !== null && editingIndex < strokes.length - 1}
+          canMoveInward={editingIndex !== null && editingIndex > 0}
+          canRemove={strokes.length > 1}
+          finalFocus={() =>
+            closingIndexRef.current !== null ? slabRefs.current[closingIndexRef.current] : null
+          }
+        />
+      </Popover>
 
       {maxStrokesReached && (
         <div
@@ -303,25 +315,6 @@ export const StrokeStack = ({
           </p>
         </div>
       )}
-
-      <StrokeEditorPopover
-        popoverRef={popoverRef}
-        position={position}
-        stroke={editingStroke}
-        label={editingLabel}
-        onUpdate={(patch) => {
-          if (editingIndex !== null) {
-            onUpdate(editingIndex, patch);
-          }
-        }}
-        onMoveOutward={() => handleMove(1)}
-        onMoveInward={() => handleMove(-1)}
-        onRemove={handleRemove}
-        onClose={close}
-        canMoveOutward={editingIndex !== null && editingIndex < strokes.length - 1}
-        canMoveInward={editingIndex !== null && editingIndex > 0}
-        canRemove={strokes.length > 1}
-      />
     </section>
   );
 };

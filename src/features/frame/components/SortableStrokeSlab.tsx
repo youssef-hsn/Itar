@@ -17,7 +17,7 @@ type SortableStrokeSlabProps = {
   stroke: Stroke;
   label: string;
   isEditing: boolean;
-  onOpen: (anchor: HTMLElement) => void;
+  onOpen: () => void;
   buttonRef: (node: HTMLButtonElement | null) => void;
   className?: string;
 };
