@@ -105,14 +105,16 @@ Popovers portal to `document.body`, escaping the sticky editor rail's `overflow`
 
 ## 6. Components
 
-**Layout.** `BaseLayout.astro` — page shell, meta + Open Graph tags, Source Sans 3 loading. Props: `title`, `description`.
+**Layout.** `BaseLayout.astro` — page shell, meta + Open Graph tags (`og:image` defaults to `/og.png`), Source Sans 3 loading. Props: `title`, `description`, `ogImage`, `headerVariant`.
 
-**Index surface** (`src/pages/index.astro`) — static hero copy + two React islands:
+**Site shell.** `SiteHeader` is sticky at `--z-sticky` with a `marketing` variant (wordmark at `type-title`, section links, teal “Open the editor” CTA, theme toggle) and a `tool` variant (back link, theme toggle). The teal CTA is the header's only accent, keeping the ≤10% budget. `SiteFooter` is shared.
 
-| Island | Role |
-| --- | --- |
-| `HeroSpecimen` | Read-only demo frame around `/specimen.jpg`; reads `?f=` once; mat-toned fallback on image error |
-| `FrameEditor` | Full editor: preview, controls, drop-anywhere intake, export |
+**Routes.**
+
+- `/` — marketing. Static hero (`h1` at `type-display`, the largest text on the page), one `PresetGallery` island holding window-level drop/paste, then How it works, Why this exists, Nothing uploads, A frame is a link, and Questions. Legacy `/?f=` links forward to `/editor` before paint.
+- `/editor` — the tool. `FrameEditor` unchanged, under the `tool` header variant. Picks up an IndexedDB-stashed image on mount.
+
+**Preset gallery.** Four `PresetCard`s render the same `frameGeometry` → `frameCss` pipeline as the editor around a mat-toned sample panel, swapping to the visitor's own photo via an object URL when one is dropped. Cards are anchors to `/editor?f=<encodeFrame(preset)>`; a normal click stashes the file first.
 
 **FrameEditor** (`src/features/frame/components/FrameEditor.tsx`) — `NuqsAdapter` root. ≥1024px: dominant `FrameStage` left, sticky ~360px control rail right. Below breakpoint: stage then full-width panel. Rail order: Image → Presets → Mat → Strokes → Corner radius → Export. Window-level `DropOverlay` at `--z-overlay` for accept/reject drag feedback; sonner toasts for transient feedback; inline `Alert` for invalid URL state.
 

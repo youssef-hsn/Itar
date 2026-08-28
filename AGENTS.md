@@ -31,10 +31,14 @@ src/
     theme/           # ThemeToggle and ThemeScript
     ui/              # shadcn primitives (retuned)
   features/
+    frame/           # editor, drop target, image handoff
+    landing/         # marketing gallery, cards, static sections
     <feature>/
       components/    # feature UI (React)
       pages/         # feature page modules (optional)
-  pages/             # Astro routes
+  assets/
+    fonts/           # vendored TTF the OG endpoint reads at build time
+  pages/             # Astro routes (`/`, `/editor`, `/og.png`)
 ```
 
 Group by feature, not by layer. No barrel files — import from source paths.
