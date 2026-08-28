@@ -12,6 +12,7 @@ import { decodeFrame } from '../frame.codec.ts';
 import { PRESETS } from '../frame.schema.ts';
 import { useFrameState } from '../hooks/useFrameState.ts';
 import { useImageDrop } from '../hooks/useImageDrop.ts';
+import { takeStashedImage } from '../imageHandoff.ts';
 import { DropOverlay } from './DropOverlay.tsx';
 import { ExportBar } from './ExportBar.tsx';
 import { FrameStage } from './FrameStage.tsx';
@@ -50,6 +51,7 @@ function FrameEditorInner() {
     acceptAttribute,
     triggerBrowse,
     onBrowseChange,
+    intakeFile,
   } = useImageDrop();
 
   const [invalidUrlSettings, setInvalidUrlSettings] = useState(false);
@@ -66,6 +68,20 @@ function FrameEditorInner() {
       setInvalidUrlSettings(true);
     }
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void takeStashedImage().then((file) => {
+      if (!cancelled && file) {
+        void intakeFile(file);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [intakeFile]);
 
   useEffect(() => {
     if (unsupportedMessage) {

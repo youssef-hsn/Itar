@@ -1,0 +1,15 @@
+---
+import BaseLayout from '#/components/layout/BaseLayout.astro';
+import { FrameEditor } from '#/features/frame/components/FrameEditor.tsx';
+---
+
+<BaseLayout
+  title="Editor — Itar"
+  description="Adjust the mat, strokes and radius, then download your framed PNG."
+  headerVariant="tool"
+>
+  <main>
+    <h1 class="sr-only">Itar frame editor</h1>
+    <FrameEditor client:load />
+  </main>
+</BaseLayout>
