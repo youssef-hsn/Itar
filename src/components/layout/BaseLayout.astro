@@ -1,19 +1,24 @@
 ---
-import { ThemeToggle } from '#/components/theme/ThemeToggle.tsx';
 import ThemeScript from '#/components/theme/ThemeScript.astro';
 import '#/styles/global.css';
+import SiteFooter from './SiteFooter.astro';
+import SiteHeader from './SiteHeader.astro';
 
 type Props = {
   title?: string;
   description?: string;
+  ogImage?: string;
+  headerVariant?: 'marketing' | 'tool';
 };
 
 const {
   title = 'Itar',
   description = 'Instantly style and wrap images in customizable Arabic borders.',
+  ogImage = '/og.png',
+  headerVariant = 'marketing',
 } = Astro.props;
 
-const ogImage = new URL('/specimen.jpg', Astro.url);
+const ogImageUrl = new URL(ogImage, Astro.url);
 ---
 
 <!doctype html>
@@ -27,7 +32,8 @@ const ogImage = new URL('/specimen.jpg', Astro.url);
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={Astro.url.href} />
-    <meta property="og:image" content={ogImage.href} />
+    <meta property="og:image" content={ogImageUrl.href} />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -40,9 +46,8 @@ const ogImage = new URL('/specimen.jpg', Astro.url);
     <ThemeScript />
   </head>
   <body>
-    <header class="mx-auto flex w-full max-w-[var(--container-max)] items-center justify-end px-4 pt-4">
-      <ThemeToggle client:load />
-    </header>
+    <SiteHeader variant={headerVariant} />
     <slot />
+    <SiteFooter />
   </body>
 </html>

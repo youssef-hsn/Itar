@@ -1,0 +1,71 @@
+---
+import { ThemeToggle } from '#/components/theme/ThemeToggle.tsx';
+
+type Props = {
+  variant: 'marketing' | 'tool';
+};
+
+const { variant } = Astro.props;
+
+const sections = [
+  { href: '#frames', label: 'Frames' },
+  { href: '#how', label: 'How it works' },
+  { href: '#privacy', label: 'Privacy' },
+];
+---
+
+<header
+  class="sticky top-0 z-[var(--z-sticky)] border-border border-b bg-background/85 backdrop-blur"
+>
+  <div
+    class="mx-auto flex w-full max-w-[var(--container-max)] items-center gap-4 px-4 py-3"
+  >
+    {
+      variant === 'tool' ? (
+        <a
+          href="/"
+          class="type-label flex min-h-11 items-center gap-2 text-foreground-strong hover:text-primary"
+        >
+          <span aria-hidden="true">&larr;</span>
+          Itar
+        </a>
+      ) : (
+        <a
+          href="/"
+          class="type-title min-h-11 content-center text-foreground-strong"
+        >
+          Itar
+        </a>
+      )
+    }
+
+    {
+      variant === 'marketing' && (
+        <nav aria-label="Sections" class="ml-4 hidden items-center gap-1 md:flex">
+          {sections.map((section) => (
+            <a
+              href={section.href}
+              class="type-label min-h-11 content-center rounded-sm px-3 text-muted-foreground transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)] hover:bg-muted hover:text-foreground"
+            >
+              {section.label}
+            </a>
+          ))}
+        </nav>
+      )
+    }
+
+    <div class="ml-auto flex items-center gap-2">
+      {
+        variant === 'marketing' && (
+          <a
+            href="/editor"
+            class="type-label inline-flex min-h-11 items-center justify-center rounded-sm border border-transparent bg-primary px-4 text-primary-foreground transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)] hover:bg-primary-hover"
+          >
+            Open the editor
+          </a>
+        )
+      }
+      <ThemeToggle client:load />
+    </div>
+  </div>
+</header>
