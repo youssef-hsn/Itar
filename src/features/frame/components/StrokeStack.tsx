@@ -19,14 +19,14 @@ import {
 } from '@dnd-kit/sortable';
 import { AlertTriangle, GripVertical, Plus } from 'lucide-react';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Button } from '#/components/ui/button.tsx';
 import { cn } from '#/lib/utils.ts';
 import type { Stroke } from '../frame.schema.ts';
 import { useAnchoredPopover } from '../hooks/useAnchoredPopover.ts';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion.ts';
 import { useStrokeIds } from '../hooks/useStrokeIds.ts';
 import { strokeDisplayName } from '../strokeLabel.ts';
-import { dragHandleClass, labelButtonClass } from './controlButton.ts';
-import { SortableStrokeSlab } from './SortableStrokeSlab.tsx';
+import { dragHandleClass, SortableStrokeSlab } from './SortableStrokeSlab.tsx';
 import { STROKE_NAME_FIELD_ID, StrokeEditorPopover } from './StrokeEditorPopover.tsx';
 import { StrokeSlab } from './StrokeSlab.tsx';
 
@@ -221,17 +221,15 @@ export const StrokeStack = ({
           </h2>
           <p className="type-caption text-muted-foreground">Outermost first</p>
         </div>
-        <button
-          type="button"
+        <Button
           ref={addButtonRef}
           onClick={handleAdd}
           disabled={maxStrokesReached}
-          className={labelButtonClass}
           aria-describedby={maxStrokesReached ? 'max-strokes-notice' : undefined}
         >
           <Plus className="size-4" aria-hidden="true" />
           Add stroke
-        </button>
+        </Button>
       </div>
 
       <DndContext

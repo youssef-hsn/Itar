@@ -1,4 +1,5 @@
 import { Download, Image, Link } from 'lucide-react';
+import { Button } from '#/components/ui/button.tsx';
 import { cn } from '#/lib/utils.ts';
 
 type ExportBarProps = {
@@ -9,12 +10,6 @@ type ExportBarProps = {
   onCopyLink: () => void;
   className?: string;
 };
-
-const actionButtonClass = cn(
-  'inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-sm px-4 type-label',
-  'transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)]',
-  'focus-visible:ring-ring',
-);
 
 export const ExportBar = ({
   hasImage,
@@ -33,18 +28,13 @@ export const ExportBar = ({
       </h2>
 
       <div className="flex flex-col gap-2 sm:flex-row">
-        <button
-          type="button"
+        <Button
+          variant="default"
+          className="flex-1"
           onClick={onDownload}
           disabled={downloadDisabled}
           aria-disabled={downloadDisabled}
           aria-describedby={downloadDisabled ? 'download-disabled-reason' : undefined}
-          className={cn(
-            actionButtonClass,
-            'bg-primary text-primary-foreground',
-            'hover:bg-teal-600',
-            'disabled:pointer-events-none disabled:opacity-50',
-          )}
         >
           {isExporting ? (
             'Exporting…'
@@ -54,21 +44,12 @@ export const ExportBar = ({
               Download PNG
             </>
           )}
-        </button>
+        </Button>
 
-        <button
-          type="button"
-          onClick={onCopyLink}
-          className={cn(
-            actionButtonClass,
-            'border border-border bg-background text-foreground',
-            'hover:bg-muted',
-          )}
-          aria-live="polite"
-        >
+        <Button variant="outline" className="flex-1" onClick={onCopyLink} aria-live="polite">
           <Link className="size-4" aria-hidden="true" />
           {linkCopied ? 'Copied' : 'Copy link'}
-        </button>
+        </Button>
       </div>
 
       {!hasImage && (

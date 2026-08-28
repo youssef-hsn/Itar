@@ -2,6 +2,7 @@ import { Image } from 'lucide-react';
 import { throttle } from 'nuqs';
 import { NuqsAdapter } from 'nuqs/adapters/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Button } from '#/components/ui/button.tsx';
 import { cn } from '#/lib/utils.ts';
 import { EXPORT_DOWNSCALE_NOTICE, exportPng, renderFrame } from '../frame.canvas.ts';
 import { decodeFrame } from '../frame.codec.ts';
@@ -159,19 +160,10 @@ function FrameEditorInner() {
               onChange={onBrowseChange}
               className="sr-only"
             />
-            <button
-              type="button"
-              onClick={triggerBrowse}
-              className={cn(
-                'inline-flex min-h-11 items-center justify-center gap-2 rounded-sm border border-border bg-background px-4 type-label text-foreground',
-                'transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)]',
-                'hover:bg-muted',
-                'focus-visible:ring-ring',
-              )}
-            >
+            <Button variant="outline" onClick={triggerBrowse}>
               <Image className="size-4" aria-hidden="true" />
               {hasImage ? 'Replace image' : 'Browse for image'}
-            </button>
+            </Button>
             <p className="type-label text-muted-foreground">
               Drop anywhere on the page, paste from clipboard, or browse here.
             </p>

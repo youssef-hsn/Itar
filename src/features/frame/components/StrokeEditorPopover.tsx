@@ -1,9 +1,9 @@
 import { ArrowDown, ArrowUp, Trash2, X } from 'lucide-react';
 import type { RefObject } from 'react';
+import { Button } from '#/components/ui/button.tsx';
 import { cn } from '#/lib/utils.ts';
 import { MAX_STROKE_NAME_LENGTH, type Stroke } from '../frame.schema.ts';
 import { ColorField } from './ColorField.tsx';
-import { iconButtonClass, labelButtonClass } from './controlButton.ts';
 import { NumberField } from './NumberField.tsx';
 import { TextField } from './TextField.tsx';
 
@@ -65,14 +65,15 @@ export const StrokeEditorPopover = ({
         <>
           <div className="flex items-center justify-between gap-2">
             <h3 className="type-label text-foreground">{label}</h3>
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="icon"
               onClick={onClose}
-              className={iconButtonClass}
+              className="text-muted-foreground hover:text-foreground"
               aria-label="Close stroke editor"
             >
               <X className="size-4" aria-hidden="true" />
-            </button>
+            </Button>
           </div>
 
           <TextField
@@ -100,34 +101,34 @@ export const StrokeEditorPopover = ({
 
           <div className="flex flex-col gap-2 border-border border-t pt-4">
             <div className="flex gap-2">
-              <button
-                type="button"
+              <Button
+                variant="outline"
                 onClick={onMoveOutward}
                 disabled={!canMoveOutward}
-                className={cn(labelButtonClass, 'flex-1')}
+                className="flex-1"
               >
                 <ArrowUp className="size-4" aria-hidden="true" />
                 Move outward
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="outline"
                 onClick={onMoveInward}
                 disabled={!canMoveInward}
-                className={cn(labelButtonClass, 'flex-1')}
+                className="flex-1"
               >
                 <ArrowDown className="size-4" aria-hidden="true" />
                 Move inward
-              </button>
+              </Button>
             </div>
-            <button
-              type="button"
+            <Button
+              variant="outline"
               onClick={onRemove}
               disabled={!canRemove}
-              className={cn(labelButtonClass, 'justify-center')}
+              className="justify-center"
             >
               <Trash2 className="size-4" aria-hidden="true" />
               Remove stroke
-            </button>
+            </Button>
           </div>
         </>
       )}

@@ -1,9 +1,16 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
+import { cn } from '#/lib/utils.ts';
 import type { Stroke } from '../frame.schema.ts';
-import { dragHandleClass } from './controlButton.ts';
 import { StrokeSlab } from './StrokeSlab.tsx';
+
+export const dragHandleClass = cn(
+  'flex w-11 shrink-0 touch-none items-center justify-center self-stretch',
+  'border-border border-r text-muted-foreground',
+  'transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)]',
+  'cursor-grab hover:bg-muted hover:text-foreground active:cursor-grabbing',
+);
 
 type SortableStrokeSlabProps = {
   id: string;
