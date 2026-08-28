@@ -1,5 +1,6 @@
 import { AlertTriangle } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert.tsx';
 import { frameCss } from '../frame.css.ts';
 import { frameGeometry } from '../frame.geometry.ts';
 import type { Frame } from '../frame.schema.ts';
@@ -95,16 +96,20 @@ export const DropOverlay = ({ dragState, rejectedMime }: DropOverlayProps) => {
               <p className="type-body text-muted-foreground">Drop to frame it</p>
             </>
           ) : (
-            <>
+            <Alert
+              variant="destructive"
+              className="flex flex-col items-center gap-2 bg-transparent p-0 text-center"
+            >
               <AlertTriangle
-                className="size-8"
-                style={{ color: 'var(--status-danger)' }}
+                className="size-8 text-destructive"
                 aria-hidden="true"
                 strokeWidth={1.75}
               />
-              <p className="type-title text-foreground">Unsupported file</p>
-              <p className="type-body text-muted-foreground">{rejectMessage(rejectedMime)}</p>
-            </>
+              <AlertTitle className="type-title text-foreground">Unsupported file</AlertTitle>
+              <AlertDescription className="type-body text-muted-foreground">
+                {rejectMessage(rejectedMime)}
+              </AlertDescription>
+            </Alert>
           )}
         </div>
       </div>

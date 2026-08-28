@@ -19,6 +19,7 @@ import {
 } from '@dnd-kit/sortable';
 import { AlertTriangle, GripVertical, Plus } from 'lucide-react';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Alert, AlertDescription } from '#/components/ui/alert.tsx';
 import { Button } from '#/components/ui/button.tsx';
 import { Popover } from '#/components/ui/popover.tsx';
 import { cn } from '#/lib/utils.ts';
@@ -300,20 +301,12 @@ export const StrokeStack = ({
       </Popover>
 
       {maxStrokesReached && (
-        <div
-          id="max-strokes-notice"
-          role="status"
-          aria-live="polite"
-          className="flex items-start gap-2 rounded-sm bg-muted px-3 py-2"
-        >
-          <AlertTriangle
-            className="mt-0.5 size-4 shrink-0 text-muted-foreground"
-            aria-hidden="true"
-          />
-          <p className="type-label text-muted-foreground">
+        <Alert id="max-strokes-notice" role="status" aria-live="polite">
+          <AlertTriangle className="size-4 text-muted-foreground" aria-hidden="true" />
+          <AlertDescription>
             Maximum of 8 strokes reached. Remove one to add another.
-          </p>
-        </div>
+          </AlertDescription>
+        </Alert>
       )}
     </section>
   );
