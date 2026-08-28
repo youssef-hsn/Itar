@@ -39,10 +39,26 @@
   --color-muted-foreground: var(--text-muted);
   --color-border: var(--border-subtle);
   --color-ring: var(--brand-primary);
+  --color-primary-hover: var(--brand-primary-hover);
+  --color-foreground-strong: var(--text-strong);
+  --color-foreground-subtle: var(--text-subtle);
+
+  --color-card: var(--surface-card);
+  --color-card-foreground: var(--text-body);
+  --color-popover: var(--surface-popover);
+  --color-popover-foreground: var(--text-body);
+  --color-secondary: var(--surface-secondary);
+  --color-secondary-foreground: var(--text-strong);
+  --color-accent: var(--surface-accent);
+  --color-accent-foreground: var(--text-strong);
+  --color-destructive: var(--surface-destructive);
+  --color-destructive-foreground: var(--text-on-destructive);
+  --color-input: var(--border-input);
 
   --radius-sm: var(--radius-control-sm);
   --radius-md: var(--radius-control-md);
   --radius-lg: var(--radius-control-lg);
+  --radius-xl: var(--radius-control-xl);
 }
 
 @utility type-display {

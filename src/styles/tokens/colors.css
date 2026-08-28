@@ -22,6 +22,7 @@
   --ink-700: oklch(0.34 0.018 195);
   --ink-800: oklch(0.26 0.019 195);
   --ink-900: oklch(0.2 0.02 195);
+  --ink-950: oklch(0.16 0.02 195);
 
   --white: oklch(1 0 0);
 
@@ -53,4 +54,13 @@
   --border-default: var(--ink-300);
   --border-strong: var(--ink-600);
   --border-brand: var(--teal-500);
+
+  --surface-card: var(--surface-panel);
+  --surface-popover: var(--surface-panel);
+  --surface-secondary: var(--surface-sunken);
+  --surface-accent: var(--surface-sunken);
+  --surface-destructive: var(--status-danger);
+
+  --text-on-destructive: var(--white);
+  --border-input: var(--border-default);
 }
