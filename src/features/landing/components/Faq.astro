@@ -1,0 +1,45 @@
+---
+const entries = [
+  {
+    q: 'Does my photo get uploaded anywhere?',
+    a: 'No. Itar has no server. Decoding, framing and export all happen in your browser.',
+  },
+  {
+    q: 'Which file types work?',
+    a: 'PNG, JPEG, WebP, AVIF and GIF. SVG is not supported, because it cannot be exported cleanly to a raster frame.',
+  },
+  {
+    q: 'What resolution do I get back?',
+    a: 'The original resolution, up to 8192 pixels on the longest edge. Anything larger is scaled to fit that limit, and Itar tells you when it does.',
+  },
+  {
+    q: 'Do I need an account?',
+    a: 'No. There is nothing to sign up for and nothing to pay.',
+  },
+  {
+    q: 'Can I save a frame I like?',
+    a: 'Copy the link. The full frame is encoded in the URL, so bookmarking it is the same as saving it.',
+  },
+  {
+    q: 'Does it work on a phone?',
+    a: 'Yes. Controls clear the 44-pixel touch target floor and the layout stacks below 1024 pixels.',
+  },
+];
+---
+
+<section
+  class="mx-auto w-full max-w-[var(--container-max)] px-4 py-16"
+  aria-labelledby="faq-heading"
+>
+  <h2 id="faq-heading" class="type-headline text-foreground-strong">Questions</h2>
+  <dl class="mt-8 grid max-w-[70ch] gap-6">
+    {
+      entries.map((entry) => (
+        <div class="border-border border-t pt-4">
+          <dt class="type-title text-foreground-strong">{entry.q}</dt>
+          <dd class="type-body mt-2 text-muted-foreground">{entry.a}</dd>
+        </div>
+      ))
+    }
+  </dl>
+</section>

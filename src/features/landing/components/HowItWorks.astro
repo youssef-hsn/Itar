@@ -1,0 +1,35 @@
+---
+const steps = [
+  {
+    title: 'Drop a photo',
+    body: 'Drag it anywhere on the page, paste it from your clipboard, or browse for it. PNG, JPEG, WebP, AVIF and GIF all work.',
+  },
+  {
+    title: 'Adjust four numbers',
+    body: 'Mat padding, corner radius, and a stack of strokes — each with a width and a colour. That is the whole model. Start from a preset and change what you like.',
+  },
+  {
+    title: 'Download the PNG',
+    body: 'Full resolution, up to 8192 pixels on the longest edge. No watermark, no account, no export queue.',
+  },
+];
+---
+
+<section
+  id="how"
+  class="mx-auto w-full max-w-[var(--container-max)] px-4 py-16"
+  aria-labelledby="how-heading"
+>
+  <h2 id="how-heading" class="type-headline text-foreground-strong">How it works</h2>
+  <ol class="mt-8 grid gap-8 md:grid-cols-3">
+    {
+      steps.map((step, index) => (
+        <li class="flex flex-col gap-2 border-border border-t pt-4">
+          <span class="type-caption tabular-nums text-primary">{`0${index + 1}`}</span>
+          <h3 class="type-title text-foreground-strong">{step.title}</h3>
+          <p class="type-body text-muted-foreground">{step.body}</p>
+        </li>
+      ))
+    }
+  </ol>
+</section>
