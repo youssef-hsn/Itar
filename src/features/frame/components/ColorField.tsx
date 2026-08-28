@@ -1,4 +1,6 @@
 import { type ChangeEvent, useEffect, useId, useState } from 'react';
+import { Input } from '#/components/ui/input.tsx';
+import { Label } from '#/components/ui/label.tsx';
 import { cn } from '#/lib/utils.ts';
 
 type ColorFieldProps = {
@@ -92,9 +94,7 @@ export const ColorField = ({ label, value, onChange, id, className }: ColorField
 
   return (
     <div className={cn('flex flex-col gap-2', className)}>
-      <label htmlFor={fieldId} className="type-label text-foreground">
-        {label}
-      </label>
+      <Label htmlFor={fieldId}>{label}</Label>
       <div className="flex items-center gap-2">
         <div className="relative shrink-0">
           <span
@@ -110,7 +110,7 @@ export const ColorField = ({ label, value, onChange, id, className }: ColorField
             className="absolute inset-0 size-full cursor-pointer opacity-0"
           />
         </div>
-        <input
+        <Input
           id={fieldId}
           type="text"
           value={hexDraft}
@@ -119,24 +119,18 @@ export const ColorField = ({ label, value, onChange, id, className }: ColorField
           onBlur={handleHexBlur}
           spellCheck={false}
           autoComplete="off"
-          className={cn(
-            'type-label min-h-11 flex-1 rounded-sm border border-border bg-background px-3 font-mono text-foreground uppercase',
-            'focus-visible:ring-ring',
-          )}
+          className="flex-1 font-mono uppercase"
           aria-label={`${label} hex`}
         />
         <div className="flex items-center gap-1">
-          <input
+          <Input
             type="number"
             min={0}
             max={100}
             value={alpha}
             onChange={handleAlphaChange}
             aria-label={`${label} opacity`}
-            className={cn(
-              'type-label w-14 min-h-11 rounded-sm border border-border bg-background px-2 text-center text-foreground tabular-nums',
-              'focus-visible:ring-ring',
-            )}
+            className="w-14 text-center tabular-nums"
           />
           <span className="type-label text-muted-foreground">%</span>
         </div>

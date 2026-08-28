@@ -1,4 +1,6 @@
-import { type ChangeEvent, useEffect, useId, useState } from 'react';
+import { type ChangeEvent, type Ref, useEffect, useId, useState } from 'react';
+import { Input } from '#/components/ui/input.tsx';
+import { Label } from '#/components/ui/label.tsx';
 import { cn } from '#/lib/utils.ts';
 
 type TextFieldProps = {
@@ -9,6 +11,7 @@ type TextFieldProps = {
   maxLength?: number;
   id?: string;
   className?: string;
+  ref?: Ref<HTMLInputElement>;
 };
 
 export const TextField = ({
@@ -19,6 +22,7 @@ export const TextField = ({
   maxLength,
   id,
   className,
+  ref,
 }: TextFieldProps) => {
   const generatedId = useId();
   const fieldId = id ?? generatedId;
@@ -38,10 +42,9 @@ export const TextField = ({
 
   return (
     <div className={cn('flex flex-col gap-2', className)}>
-      <label htmlFor={fieldId} className="type-label text-foreground">
-        {label}
-      </label>
-      <input
+      <Label htmlFor={fieldId}>{label}</Label>
+      <Input
+        ref={ref}
         id={fieldId}
         type="text"
         value={draft}
@@ -52,11 +55,6 @@ export const TextField = ({
         maxLength={maxLength}
         autoComplete="off"
         spellCheck={false}
-        className={cn(
-          'type-label min-h-11 w-full rounded-sm border border-border bg-background px-3 text-foreground',
-          'placeholder:text-muted-foreground',
-          'focus-visible:ring-ring',
-        )}
       />
     </div>
   );
