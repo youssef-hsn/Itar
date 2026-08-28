@@ -18,7 +18,7 @@ type StrokeSlabProps = {
 };
 
 const CHECKER =
-  'repeating-conic-gradient(var(--ink-200) 0% 25%, var(--white) 0% 50%) 0 0 / 8px 8px';
+  'repeating-conic-gradient(var(--surface-sunken) 0% 25%, var(--surface-panel) 0% 50%) 0 0 / 8px 8px';
 
 const StrokeSwatch = ({ stroke }: { stroke: Stroke }) => (
   <span
@@ -54,7 +54,7 @@ export const StrokeSlab = ({
         'flex items-stretch overflow-hidden rounded-sm border bg-background',
         isEditing ? 'border-primary' : 'border-border',
         isDragging && 'opacity-40',
-        isOverlay && 'shadow-[0_8px_24px_oklch(0.2_0.02_195/0.14)]',
+        isOverlay && 'shadow-[var(--shadow-lift)]',
         className,
       )}
     >

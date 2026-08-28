@@ -34,3 +34,9 @@
   --z-overlay: 40;
   --z-toast: 50;
 }
+
+.dark {
+  --ring-brand: 0 0 0 3px oklch(0.62 0.085 195 / 0.45);
+  --shadow-popover: 0 8px 24px oklch(0.08 0.01 195 / 0.5);
+  --shadow-lift: 0 8px 24px oklch(0.08 0.01 195 / 0.6);
+}

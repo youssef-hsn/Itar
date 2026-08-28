@@ -64,3 +64,36 @@
   --text-on-destructive: var(--white);
   --border-input: var(--border-default);
 }
+
+.dark {
+  --status-success: oklch(0.72 0.09 195);
+  --status-warning: oklch(0.8 0.13 75);
+  --status-danger: oklch(0.68 0.17 25);
+  --status-info: oklch(0.68 0.09 230);
+
+  --brand-primary: var(--teal-400);
+  --brand-primary-hover: var(--teal-300);
+  --brand-primary-active: var(--teal-200);
+  --brand-soft: var(--teal-900);
+  --brand-ink: var(--ink-50);
+
+  --text-strong: var(--ink-50);
+  --text-body: var(--ink-100);
+  --text-muted: var(--ink-300);
+  --text-subtle: var(--ink-400);
+  --text-on-brand: var(--ink-900);
+  --text-link: var(--teal-300);
+
+  --surface-page: var(--ink-950);
+  --surface-panel: var(--ink-900);
+  --surface-sunken: var(--ink-800);
+  --surface-brand: var(--teal-400);
+  --surface-brand-soft: var(--teal-900);
+
+  --border-subtle: var(--ink-800);
+  --border-default: var(--ink-700);
+  --border-strong: var(--ink-400);
+  --border-brand: var(--teal-400);
+
+  --text-on-destructive: var(--ink-900);
+}

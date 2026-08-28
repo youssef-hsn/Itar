@@ -1,0 +1,11 @@
+<script is:inline>
+  try {
+    const stored = localStorage.getItem('itar-theme');
+    const isDark =
+      stored === 'dark' ||
+      (stored !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.classList.toggle('dark', isDark);
+  } catch {
+    /* private mode: fall through to the light default */
+  }
+</script>

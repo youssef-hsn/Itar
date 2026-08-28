@@ -1,4 +1,6 @@
 ---
+import { ThemeToggle } from '#/components/theme/ThemeToggle.tsx';
+import ThemeScript from '#/components/theme/ThemeScript.astro';
 import '#/styles/global.css';
 
 type Props = {
@@ -35,8 +37,12 @@ const ogImage = new URL('/specimen.jpg', Astro.url);
       href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap"
     />
     <title>{title}</title>
+    <ThemeScript />
   </head>
   <body>
+    <header class="mx-auto flex w-full max-w-[var(--container-max)] items-center justify-end px-4 pt-4">
+      <ThemeToggle client:load />
+    </header>
     <slot />
   </body>
 </html>

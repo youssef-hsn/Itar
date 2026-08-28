@@ -95,7 +95,7 @@ export const FrameStage = ({ frame, bitmap, isDecoding = false, className }: Fra
             ) : (
               <div
                 className={cn(
-                  'flex items-center justify-center bg-ink-100 type-label text-muted-foreground',
+                  'flex items-center justify-center bg-muted type-label text-muted-foreground',
                   isDecoding && 'opacity-60',
                 )}
                 style={{ width: imageSize.width, height: imageSize.height }}

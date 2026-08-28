@@ -76,7 +76,7 @@ export const DropOverlay = ({ dragState, rejectedMime }: DropOverlayProps) => {
     <div
       className={
         isAccept
-          ? 'pointer-events-none fixed inset-0 flex items-center justify-center bg-ink-900/40 p-6'
+          ? 'pointer-events-none fixed inset-0 flex items-center justify-center bg-foreground-strong/40 p-6'
           : 'pointer-events-none fixed inset-0 flex items-center justify-center p-6'
       }
       style={{ zIndex: 'var(--z-overlay, 40)', ...motionStyle, ...scrimStyle }}
