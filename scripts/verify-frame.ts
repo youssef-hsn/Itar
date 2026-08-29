@@ -1,5 +1,7 @@
 import { classifyDropAsset } from '../src/features/frame/dropAssets.ts';
 import { decodeFrame, encodeFrame } from '../src/features/frame/frame.codec.ts';
+import { frameCss } from '../src/features/frame/frame.css.ts';
+import { frameGeometry } from '../src/features/frame/frame.geometry.ts';
 import { DEFAULT_FRAME } from '../src/features/frame/frame.schema.ts';
 import {
   strokeDisplayName,
@@ -124,5 +126,14 @@ assert(
   strokeSwatchHeight({ width: 200, color: '#1a3a3f' }) === 24,
   'swatch height should cap at 24',
 );
+
+const previewGeometry = frameGeometry(DEFAULT_FRAME, { width: 480, height: 360 });
+const previewCss = frameCss(previewGeometry);
+
+assert(
+  previewCss.margin === previewGeometry.totalThickness,
+  'frame CSS must inset by stroke thickness so box-shadows fit composedSize',
+);
+assert(previewCss.overflow === 'hidden', 'frame CSS must clip the inner image to the rounded mat');
 
 console.log('frame verify: ok');

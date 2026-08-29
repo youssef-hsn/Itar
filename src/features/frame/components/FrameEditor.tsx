@@ -168,12 +168,12 @@ function FrameEditorInner() {
 
   return (
     <div className="mx-auto w-full max-w-[var(--container-max)] px-4 py-8">
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+      <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
         <FrameStage frame={frame} bitmap={bitmap} isDecoding={isDecoding} />
 
         <aside
           className={cn(
-            'flex flex-col gap-8 rounded-md border border-border bg-background p-6',
+            'flex min-w-0 flex-col gap-8 rounded-md border border-border bg-background p-6',
             'lg:sticky lg:top-20 lg:max-h-[calc(100dvh-5rem)] lg:overflow-y-auto lg:self-start',
           )}
         >

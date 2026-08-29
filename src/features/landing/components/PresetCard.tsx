@@ -1,4 +1,5 @@
-import type { CSSProperties, MouseEvent } from 'react';
+import { type MouseEvent, useEffect, useRef, useState } from 'react';
+import { ScaleToFit } from '#/features/frame/components/ScaleToFit.tsx';
 import { encodeFrame } from '#/features/frame/frame.codec.ts';
 import { frameCss } from '#/features/frame/frame.css.ts';
 import { frameGeometry } from '#/features/frame/frame.geometry.ts';
@@ -6,7 +7,6 @@ import type { Preset } from '#/features/frame/frame.schema.ts';
 import { cn } from '#/lib/utils.ts';
 import type { PreviewSource } from '../hooks/usePresetPreview.ts';
 
-const BOX_SIZE = { width: 260, height: 200 };
 const SAMPLE_SIZE = { width: 320, height: 240 };
 
 type PresetCardProps = {
@@ -17,15 +17,38 @@ type PresetCardProps = {
 };
 
 export const PresetCard = ({ preset, preview, onSelect, className }: PresetCardProps) => {
+  const boxRef = useRef<HTMLDivElement>(null);
+  const [boxSize, setBoxSize] = useState({ width: 260, height: 200 });
+
   const imageSize = preview?.size ?? SAMPLE_SIZE;
   const geometry = frameGeometry(preset.frame, imageSize);
   const { composedSize } = geometry;
   const frameStyle = frameCss(geometry);
   const scale = Math.min(
     1,
-    BOX_SIZE.width / composedSize.width,
-    BOX_SIZE.height / composedSize.height,
+    boxSize.width / composedSize.width,
+    boxSize.height / composedSize.height,
   );
+
+  useEffect(() => {
+    const box = boxRef.current;
+    if (!box) {
+      return;
+    }
+
+    const updateSize = () => {
+      const { width, height } = box.getBoundingClientRect();
+      if (width === 0 || height === 0) {
+        return;
+      }
+      setBoxSize({ width, height });
+    };
+
+    updateSize();
+    const observer = new ResizeObserver(updateSize);
+    observer.observe(box);
+    return () => observer.disconnect();
+  }, []);
 
   const href = `/editor?f=${encodeURIComponent(encodeFrame(preset.frame))}`;
   const specLine = preset.frame.strokes.map((stroke) => `${stroke.width}px`).join(' · ');
@@ -35,51 +58,38 @@ export const PresetCard = ({ preset, preview, onSelect, className }: PresetCardP
       href={href}
       onClick={(event) => onSelect(preset, event)}
       className={cn(
-        'flex flex-col items-center gap-3 rounded-md border border-border p-4',
+        'flex min-w-0 flex-col items-center gap-3 rounded-md border border-border p-4',
         'transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)]',
         'hover:border-primary hover:bg-muted',
         className,
       )}
     >
       <div
-        className="flex items-center justify-center"
-        style={{ width: BOX_SIZE.width, height: BOX_SIZE.height }}
+        ref={boxRef}
+        className="flex aspect-[13/10] w-full max-w-full items-center justify-center"
       >
-        <div style={{ width: composedSize.width * scale, height: composedSize.height * scale }}>
-          <div
-            style={
-              {
-                width: composedSize.width,
-                height: composedSize.height,
-                '--s': scale,
-                transform: 'scale(var(--s))',
-                transformOrigin: 'top left',
-              } as CSSProperties
-            }
-          >
-            <div style={frameStyle} className="inline-block">
-              {preview ? (
-                <img
-                  src={preview.url}
-                  alt={`Framed with the ${preset.name} preset`}
-                  width={imageSize.width}
-                  height={imageSize.height}
-                  className="block max-w-none"
-                />
-              ) : (
-                <div
-                  className="block"
-                  style={{
-                    width: imageSize.width,
-                    height: imageSize.height,
-                    backgroundColor: preset.frame.matColor,
-                  }}
-                  aria-hidden="true"
-                />
-              )}
-            </div>
+        <ScaleToFit width={composedSize.width} height={composedSize.height} scale={scale}>
+          <div style={frameStyle}>
+            {preview ? (
+              <img
+                src={preview.url}
+                alt={`Framed with the ${preset.name} preset`}
+                width={imageSize.width}
+                height={imageSize.height}
+                className="block max-w-none"
+              />
+            ) : (
+              <div
+                className="block bg-muted"
+                style={{
+                  width: imageSize.width,
+                  height: imageSize.height,
+                }}
+                aria-hidden="true"
+              />
+            )}
           </div>
-        </div>
+        </ScaleToFit>
       </div>
 
       <div className="flex flex-col items-center gap-1">

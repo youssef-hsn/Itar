@@ -21,9 +21,13 @@ export function frameCss(geometry: FrameGeometry): CSSProperties {
   }
 
   return {
+    display: 'block',
+    boxSizing: 'border-box',
     padding: geometry.matPadding,
     backgroundColor: geometry.matColor,
     borderRadius: geometry.radius,
     boxShadow: shadows.length > 0 ? shadows.join(', ') : undefined,
+    margin: geometry.totalThickness,
+    overflow: 'hidden',
   };
 }

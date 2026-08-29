@@ -1,8 +1,9 @@
-import { type CSSProperties, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cn } from '#/lib/utils.ts';
 import { frameCss } from '../frame.css.ts';
 import { frameGeometry } from '../frame.geometry.ts';
 import type { Frame } from '../frame.schema.ts';
+import { ScaleToFit } from './ScaleToFit.tsx';
 
 const PLACEHOLDER_SIZE = { width: 480, height: 360 };
 
@@ -64,49 +65,32 @@ export const FrameStage = ({ frame, bitmap, isDecoding = false, className }: Fra
       ref={containerRef}
       aria-label="Frame preview"
       className={cn(
-        'relative flex min-h-[min(50vh,28rem)] w-full items-center justify-center rounded-md bg-muted/40 p-4',
+        'relative flex min-h-[min(50vh,28rem)] w-full min-w-0 items-center justify-center rounded-md bg-muted/40 p-4',
         className,
       )}
     >
-      <div
-        style={{
-          width: composedSize.width * scale,
-          height: composedSize.height * scale,
-        }}
-      >
-        <div
-          style={
-            {
-              width: composedSize.width,
-              height: composedSize.height,
-              '--s': scale,
-              transform: 'scale(var(--s))',
-              transformOrigin: 'top left',
-            } as CSSProperties
-          }
-        >
-          <div style={frameStyle} className="inline-block">
-            {bitmap ? (
-              <canvas
-                ref={canvasRef}
-                className="block max-w-none"
-                aria-label="Uploaded image preview"
-              />
-            ) : (
-              <div
-                className={cn(
-                  'flex items-center justify-center bg-muted type-label text-muted-foreground',
-                  isDecoding && 'opacity-60',
-                )}
-                style={{ width: imageSize.width, height: imageSize.height }}
-                aria-hidden={isDecoding}
-              >
-                {isDecoding ? 'Opening image…' : 'your image'}
-              </div>
-            )}
-          </div>
+      <ScaleToFit width={composedSize.width} height={composedSize.height} scale={scale}>
+        <div style={frameStyle}>
+          {bitmap ? (
+            <canvas
+              ref={canvasRef}
+              className="block max-w-none"
+              aria-label="Uploaded image preview"
+            />
+          ) : (
+            <div
+              className={cn(
+                'flex items-center justify-center bg-muted type-label text-muted-foreground',
+                isDecoding && 'opacity-60',
+              )}
+              style={{ width: imageSize.width, height: imageSize.height }}
+              aria-hidden={isDecoding}
+            >
+              {isDecoding ? 'Opening image…' : 'your image'}
+            </div>
+          )}
         </div>
-      </div>
+      </ScaleToFit>
     </section>
   );
 };
