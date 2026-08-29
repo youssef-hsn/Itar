@@ -92,7 +92,7 @@ Flat by default. Depth comes from subtle tonal shifts between page, panel, and f
 
 Semantic z-index (`spacing.css`): `--z-sticky` 10 · `--z-dropdown` 20 · `--z-overlay` 40 · `--z-toast` 50. Drag overlays and toasts use these tokens; sticky editor rail stays below overlays.
 
-Popovers portal to `document.body`, escaping the sticky editor rail's `overflow` clipping. Their shadow (`--shadow-popover`) and a lifted drag item's (`--shadow-lift`) are the only shadows in the system, and both exist strictly as a response to state.
+Popovers and menus portal to `document.body`, escaping the sticky editor rail's `overflow` clipping. `--z-dropdown` is applied on the **positioner** (not the popup) so they stack above `--z-sticky` SiteHeader. Their shadow (`--shadow-popover`) and a lifted drag item's (`--shadow-lift`) are the only shadows in the system, and both exist strictly as a response to state.
 
 **The Flat-By-Default Rule.** Surfaces are flat at rest. If a shadow appears, it is a response to state (focus, open popover), never ambient decoration.
 

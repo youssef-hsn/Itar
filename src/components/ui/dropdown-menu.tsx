@@ -39,10 +39,11 @@ export const DropdownMenuContent = ({
         sideOffset={sideOffset}
         alignOffset={alignOffset}
         collisionPadding={collisionPadding}
+        className="z-[var(--z-dropdown)]"
       >
         <BaseMenu.Popup
           className={cn(
-            'z-[var(--z-dropdown)] min-w-[8rem] overflow-hidden rounded-md border border-border',
+            'min-w-[8rem] overflow-hidden rounded-md border border-border',
             'bg-popover p-1 text-popover-foreground shadow-[var(--shadow-popover)]',
             'outline-none',
             className,

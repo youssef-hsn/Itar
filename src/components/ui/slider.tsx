@@ -40,19 +40,19 @@ export const Slider = ({
       }}
       disabled={disabled}
       className={cn(
-        'relative flex h-11 w-full touch-none items-center select-none data-[disabled]:opacity-40',
+        'relative flex h-11 w-full touch-none items-center select-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-40',
         className,
       )}
       {...props}
     >
-      <BaseSlider.Control className="relative flex w-full items-center">
+      <BaseSlider.Control className="relative flex w-full cursor-pointer items-center">
         <BaseSlider.Track className="relative h-2 w-full grow overflow-hidden rounded-sm bg-muted">
           <BaseSlider.Indicator className="absolute h-full bg-primary" />
         </BaseSlider.Track>
         <BaseSlider.Thumb
           aria-label={ariaLabel}
           className={cn(
-            'relative block size-5 shrink-0 rounded-full bg-primary',
+            'relative block size-5 shrink-0 cursor-pointer rounded-full bg-primary',
             'transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)]',
             'after:absolute after:-inset-3 after:content-[""]',
           )}

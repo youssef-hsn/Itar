@@ -49,12 +49,13 @@ export const PopoverContent = ({
         collisionPadding={collisionPadding}
         collisionAvoidance={collisionAvoidance}
         positionMethod={positionMethod}
+        className="z-[var(--z-dropdown)]"
       >
         <BasePopover.Popup
           initialFocus={initialFocus}
           finalFocus={finalFocus}
           className={cn(
-            'z-[var(--z-dropdown)] w-[min(20rem,calc(100vw-1rem))] rounded-md border border-border',
+            'w-[min(20rem,calc(100vw-1rem))] rounded-md border border-border',
             'bg-popover p-4 text-popover-foreground shadow-[var(--shadow-popover)]',
             'outline-none',
             className,
