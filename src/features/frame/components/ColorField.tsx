@@ -95,7 +95,7 @@ export const ColorField = ({ label, value, onChange, id, className }: ColorField
   return (
     <div className={cn('flex flex-col gap-2', className)}>
       <Label htmlFor={fieldId}>{label}</Label>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <div className="relative shrink-0">
           <span
             className="block size-11 rounded-sm border border-border"
@@ -119,7 +119,7 @@ export const ColorField = ({ label, value, onChange, id, className }: ColorField
           onBlur={handleHexBlur}
           spellCheck={false}
           autoComplete="off"
-          className="flex-1 font-mono uppercase"
+          className="min-w-0 flex-1 font-mono uppercase"
           aria-label={`${label} hex`}
         />
         <div className="flex items-center gap-1">

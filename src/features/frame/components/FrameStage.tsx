@@ -65,7 +65,7 @@ export const FrameStage = ({ frame, bitmap, isDecoding = false, className }: Fra
       ref={containerRef}
       aria-label="Frame preview"
       className={cn(
-        'relative flex min-h-[min(50vh,28rem)] w-full min-w-0 items-center justify-center rounded-md bg-muted/40 p-4',
+        'relative flex min-h-[min(40vh,20rem)] w-full min-w-0 items-center justify-center rounded-md bg-muted/40 p-4 lg:min-h-[min(50vh,28rem)]',
         className,
       )}
     >
