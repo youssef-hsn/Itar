@@ -17,6 +17,7 @@ export type FrameGeometry = {
   matPadding: number;
   matColor: string;
   radius: number;
+  roundImage: boolean;
   matBox: Size;
   rings: RingInset[];
   composedSize: Size;
@@ -54,6 +55,7 @@ export function frameGeometry(frame: Frame, imageSize: Size): FrameGeometry {
     matPadding: frame.padding,
     matColor: frame.matColor,
     radius: frame.radius,
+    roundImage: frame.roundImage,
     matBox,
     rings,
     composedSize,

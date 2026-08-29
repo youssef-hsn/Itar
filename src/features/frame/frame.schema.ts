@@ -16,6 +16,7 @@ export const frameSchema = z.object({
   padding: z.number().int().min(0).max(400),
   matColor: hexColor,
   radius: z.number().int().min(0).max(200),
+  roundImage: z.boolean().default(false),
   strokes: z.array(strokeSchema).max(8),
 });
 
@@ -32,6 +33,7 @@ const doubleRule: Frame = {
   padding: 24,
   matColor: '#f7f4ec',
   radius: 0,
+  roundImage: false,
   strokes: [
     { width: 16, color: '#1a3a3f' },
     { width: 4, color: '#c9a227' },
@@ -48,6 +50,7 @@ export const PRESETS: Preset[] = [
       padding: 32,
       matColor: '#f7f4ec',
       radius: 0,
+      roundImage: false,
       strokes: [
         { width: 12, color: '#1a3a3f' },
         { width: 1, color: '#c9a227' },
@@ -62,6 +65,7 @@ export const PRESETS: Preset[] = [
       padding: 16,
       matColor: '#f0ede8',
       radius: 0,
+      roundImage: false,
       strokes: [
         { width: 32, color: '#1a3a3f' },
         { width: 3, color: '#c9a227' },
@@ -76,6 +80,7 @@ export const PRESETS: Preset[] = [
       padding: 28,
       matColor: '#f7f4ec',
       radius: 0,
+      roundImage: false,
       strokes: [
         { width: 1, color: '#1a3a3f' },
         { width: 4, color: '#f7f4ec00' },

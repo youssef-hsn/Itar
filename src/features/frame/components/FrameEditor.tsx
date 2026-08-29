@@ -17,8 +17,8 @@ import { DropOverlay } from './DropOverlay.tsx';
 import { ExportBar } from './ExportBar.tsx';
 import { FrameStage } from './FrameStage.tsx';
 import { MatControls } from './MatControls.tsx';
-import { NumberField } from './NumberField.tsx';
 import { PresetPicker } from './PresetPicker.tsx';
+import { RadiusControls } from './RadiusControls.tsx';
 import { StrokeStack } from './StrokeStack.tsx';
 
 const INVALID_URL_MESSAGE = "That link's frame settings couldn't be read — showing the default.";
@@ -35,6 +35,7 @@ function FrameEditorInner() {
     setPadding,
     setMatColor,
     setRadius,
+    setRoundImage,
     applyPreset,
     maxStrokesReached,
   } = useFrameState();
@@ -213,18 +214,12 @@ function FrameEditorInner() {
             maxStrokesReached={maxStrokesReached}
           />
 
-          <section className="flex flex-col gap-4" aria-labelledby="radius-heading">
-            <h2 id="radius-heading" className="type-label text-foreground">
-              Corner radius
-            </h2>
-            <NumberField
-              label="Radius"
-              value={frame.radius}
-              onChange={setRadius}
-              min={0}
-              max={200}
-            />
-          </section>
+          <RadiusControls
+            radius={frame.radius}
+            roundImage={frame.roundImage}
+            onRadiusChange={setRadius}
+            onRoundImageChange={setRoundImage}
+          />
 
           <ExportBar
             hasImage={hasImage}

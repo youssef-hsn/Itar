@@ -84,7 +84,8 @@ export function encodeFrame(frame: Frame): string {
     : CODEC_VERSION_PLAIN;
   const matColor = encodeColor(frame.matColor);
   const strokes = encodeStrokes(frame.strokes);
-  return `${version}.${frame.padding}.${matColor}.${frame.radius}~${strokes}`;
+  const radiusToken = `${frame.radius}${frame.roundImage ? 'i' : ''}`;
+  return `${version}.${frame.padding}.${matColor}.${radiusToken}~${strokes}`;
 }
 
 export function decodeFrame(raw: string): Frame | null {
@@ -111,7 +112,10 @@ export function decodeFrame(raw: string): Frame | null {
     return null;
   }
 
-  const radius = Number.parseInt(radiusAndStrokes.slice(0, tilde), 10);
+  const radiusToken = radiusAndStrokes.slice(0, tilde);
+  const roundImage = radiusToken.endsWith('i');
+  const radiusRaw = roundImage ? radiusToken.slice(0, -1) : radiusToken;
+  const radius = Number.parseInt(radiusRaw, 10);
   const strokesRaw = radiusAndStrokes.slice(tilde + 1);
   const strokes = decodeStrokes(strokesRaw);
 
@@ -123,6 +127,7 @@ export function decodeFrame(raw: string): Frame | null {
     padding,
     matColor,
     radius,
+    roundImage,
     strokes,
   });
 

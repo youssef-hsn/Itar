@@ -77,6 +77,9 @@ export const PresetCard = ({ preset, preview, onSelect, className }: PresetCardP
                 width={imageSize.width}
                 height={imageSize.height}
                 className="block max-w-none"
+                style={{
+                  borderRadius: geometry.roundImage ? geometry.radius : undefined,
+                }}
               />
             ) : (
               <div

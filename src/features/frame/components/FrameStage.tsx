@@ -75,6 +75,7 @@ export const FrameStage = ({ frame, bitmap, isDecoding = false, className }: Fra
             <canvas
               ref={canvasRef}
               className="block max-w-none"
+              style={{ borderRadius: geometry.roundImage ? geometry.radius : undefined }}
               aria-label="Uploaded image preview"
             />
           ) : (
@@ -83,7 +84,11 @@ export const FrameStage = ({ frame, bitmap, isDecoding = false, className }: Fra
                 'flex items-center justify-center bg-muted type-label text-muted-foreground',
                 isDecoding && 'opacity-60',
               )}
-              style={{ width: imageSize.width, height: imageSize.height }}
+              style={{
+                width: imageSize.width,
+                height: imageSize.height,
+                borderRadius: geometry.roundImage ? geometry.radius : undefined,
+              }}
               aria-hidden={isDecoding}
             >
               {isDecoding ? 'Opening image…' : 'your image'}

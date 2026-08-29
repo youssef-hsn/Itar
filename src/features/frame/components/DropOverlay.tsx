@@ -15,6 +15,7 @@ const OVERLAY_FRAME: Frame = {
   padding: 12,
   matColor: '#ffffff',
   radius: 6,
+  roundImage: false,
   strokes: [
     { width: 2, color: '#1a3a3f' },
     { width: 1, color: '#c9a227' },

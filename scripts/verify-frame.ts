@@ -13,6 +13,7 @@ const alphaGapFrame = {
   padding: 20,
   matColor: '#f7f4ec',
   radius: 0,
+  roundImage: false,
   strokes: [
     { width: 8, color: '#1a3a3f' },
     { width: 6, color: '#f7f4ec00' },
@@ -53,6 +54,7 @@ const namedFrame = {
   padding: 24,
   matColor: '#f7f4ec',
   radius: 0,
+  roundImage: false,
   strokes: [
     { width: 16, color: '#1a3a3f', name: 'Outer band' },
     { width: 4, color: '#c9a227' },
@@ -135,5 +137,28 @@ assert(
   'frame CSS must inset by stroke thickness so box-shadows fit composedSize',
 );
 assert(previewCss.overflow === 'hidden', 'frame CSS must clip the inner image to the rounded mat');
+
+assert(
+  decodeFrame('1.24.f7f4ec.12i~16-1a3a3f')?.roundImage === true,
+  'radius token suffix i should set roundImage',
+);
+assert(
+  decodeFrame('1.24.f7f4ec.12i~16-1a3a3f')?.radius === 12,
+  'i suffix must not change the numeric radius',
+);
+assert(
+  decodeFrame('1.24.f7f4ec.0~16-1a3a3f~4-c9a227~2-1a3a3f')?.roundImage === false,
+  'legacy links default roundImage to false',
+);
+
+const rounded = { ...DEFAULT_FRAME, radius: 12, roundImage: true };
+assert(encodeFrame(rounded).includes('.12i~'), 'roundImage should encode as radius i suffix');
+verifyRoundTrip('roundImage frame', rounded);
+
+const decodedRounded = decodeFrame('1.24.f7f4ec.12i~16-1a3a3f');
+assert(
+  decodedRounded !== null && encodeFrame(decodedRounded) === '1.24.f7f4ec.12i~16-1a3a3f',
+  'i-suffix frames should round-trip',
+);
 
 console.log('frame verify: ok');

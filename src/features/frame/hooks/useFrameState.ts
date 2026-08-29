@@ -91,6 +91,13 @@ export function useFrameState() {
     [updateFrame],
   );
 
+  const setRoundImage = useCallback(
+    (roundImage: boolean) => {
+      updateFrame((current) => ({ ...current, roundImage }));
+    },
+    [updateFrame],
+  );
+
   const applyPreset = useCallback(
     (presetId: string) => {
       const preset = PRESETS.find((entry) => entry.id === presetId);
@@ -111,6 +118,7 @@ export function useFrameState() {
     setPadding,
     setMatColor,
     setRadius,
+    setRoundImage,
     applyPreset,
     maxStrokesReached: frame.strokes.length >= MAX_STROKES,
   };

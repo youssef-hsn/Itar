@@ -58,7 +58,7 @@ export function renderFrame(bitmap: ImageBitmap, frame: Frame): RenderFrameResul
     ctx.scale(scale, scale);
   }
 
-  const { matBox, totalThickness, matPadding, radius, matColor, rings } = geometry;
+  const { matBox, totalThickness, matPadding, radius, matColor, rings, roundImage } = geometry;
   const matX = totalThickness;
   const matY = totalThickness;
   const matW = matBox.width;
@@ -95,7 +95,23 @@ export function renderFrame(bitmap: ImageBitmap, frame: Frame): RenderFrameResul
   ctx.fillStyle = matColor;
   ctx.fill();
 
+  if (roundImage) {
+    ctx.save();
+    ctx.beginPath();
+    traceRoundedRect(
+      ctx,
+      matX + matPadding,
+      matY + matPadding,
+      imageSize.width,
+      imageSize.height,
+      radius,
+    );
+    ctx.clip();
+  }
   ctx.drawImage(bitmap, matX + matPadding, matY + matPadding, imageSize.width, imageSize.height);
+  if (roundImage) {
+    ctx.restore();
+  }
 
   return { canvas, downscaled };
 }
