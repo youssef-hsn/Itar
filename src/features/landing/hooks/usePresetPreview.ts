@@ -42,6 +42,7 @@ export function usePresetPreview() {
 
     return () => {
       cancelled = true;
+      setPreview(null);
       URL.revokeObjectURL(url);
     };
   }, [file]);

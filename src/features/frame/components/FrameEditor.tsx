@@ -174,7 +174,7 @@ function FrameEditorInner() {
         <aside
           className={cn(
             'flex flex-col gap-8 rounded-md border border-border bg-background p-6',
-            'lg:sticky lg:top-6 lg:max-h-[calc(100dvh-3rem)] lg:overflow-y-auto lg:self-start',
+            'lg:sticky lg:top-20 lg:max-h-[calc(100dvh-5rem)] lg:overflow-y-auto lg:self-start',
           )}
         >
           <section className="flex flex-col gap-3" aria-labelledby="image-heading">
