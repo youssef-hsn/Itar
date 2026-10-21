@@ -6,10 +6,22 @@ const hexColor = z
 
 export const MAX_STROKE_NAME_LENGTH = 24;
 
+export const MOTIF_IDS = ['khatam', 'interlace', 'kufic', 'mihrab'] as const;
+
+export type MotifId = (typeof MOTIF_IDS)[number];
+
+export const ornamentSchema = z.object({
+  motif: z.enum(MOTIF_IDS),
+  ink: hexColor,
+});
+
+export type Ornament = z.infer<typeof ornamentSchema>;
+
 export const strokeSchema = z.object({
   width: z.number().int().min(0).max(200),
   color: hexColor,
   name: z.string().min(1).max(MAX_STROKE_NAME_LENGTH).optional(),
+  ornament: ornamentSchema.optional(),
 });
 
 export const frameSchema = z.object({

@@ -2,7 +2,7 @@ import { classifyDropAsset } from '../src/features/frame/dropAssets.ts';
 import { decodeFrame, encodeFrame } from '../src/features/frame/frame.codec.ts';
 import { frameCss } from '../src/features/frame/frame.css.ts';
 import { frameGeometry } from '../src/features/frame/frame.geometry.ts';
-import { DEFAULT_FRAME } from '../src/features/frame/frame.schema.ts';
+import { DEFAULT_FRAME, frameSchema } from '../src/features/frame/frame.schema.ts';
 import {
   strokeDisplayName,
   strokeSpecLine,
@@ -159,6 +159,25 @@ const decodedRounded = decodeFrame('1.24.f7f4ec.12i~16-1a3a3f');
 assert(
   decodedRounded !== null && encodeFrame(decodedRounded) === '1.24.f7f4ec.12i~16-1a3a3f',
   'i-suffix frames should round-trip',
+);
+
+const ornateStrokeFrame = (ornament: { motif: string; ink: string }) => ({
+  ...DEFAULT_FRAME,
+  strokes: [{ width: 24, color: '#1a3a3f', ornament }],
+});
+
+const parsedOrnate = frameSchema.safeParse(ornateStrokeFrame({ motif: 'khatam', ink: '#c9a227' }));
+assert(
+  parsedOrnate.success && parsedOrnate.data.strokes[0]?.ornament?.motif === 'khatam',
+  'strokes should keep a valid ornament',
+);
+assert(
+  !frameSchema.safeParse(ornateStrokeFrame({ motif: 'paisley', ink: '#c9a227' })).success,
+  'unknown motifs should be rejected',
+);
+assert(
+  !frameSchema.safeParse(ornateStrokeFrame({ motif: 'khatam', ink: 'gold' })).success,
+  'non-hex ornament ink should be rejected',
 );
 
 console.log('frame verify: ok');
