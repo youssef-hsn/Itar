@@ -1,3 +1,5 @@
+import { frameGeometry } from '../src/features/frame/frame.geometry.ts';
+import { framePaint } from '../src/features/frame/frame.paint.ts';
 import {
   fmt,
   type PathCommand,
@@ -5,6 +7,7 @@ import {
   roundedRectPath,
   toPathData,
 } from '../src/features/frame/frame.path.ts';
+import { DEFAULT_FRAME, type Frame } from '../src/features/frame/frame.schema.ts';
 import { bandInkPath } from '../src/features/frame/ornament/band.ts';
 import { MOTIFS } from '../src/features/frame/ornament/motif.ts';
 
@@ -85,5 +88,62 @@ const kuficMoves = bandInkPath(bandRect, 20, MOTIFS.kufic).match(/M/g)?.length;
 assert(kuficMoves === 130, `kufic band should have 130 subpaths, got ${kuficMoves}`);
 
 assert(bandInkPath(bandRect, 3, MOTIFS.khatam) === '', 'bands under 4px should carry no ink');
+
+const IMAGE = { width: 480, height: 360 };
+const plainGeometry = frameGeometry(DEFAULT_FRAME, IMAGE);
+const plainOps = framePaint(plainGeometry);
+
+assert(plainOps.length === 4, `default frame should paint 3 rings + mat, got ${plainOps.length}`);
+assert(plainOps.at(-1)?.fill === plainGeometry.matColor, 'the mat should paint last');
+assert(
+  plainOps.every((op) => !op.d.includes('A')),
+  'a zero-radius frame should keep square ring corners',
+);
+assert(
+  framePaint(frameGeometry({ ...DEFAULT_FRAME, radius: 12 }, IMAGE))[0]?.d.includes('A'),
+  'a rounded frame should round its rings',
+);
+
+const withRing = (ring: Frame['strokes'][number]): Frame => ({
+  ...DEFAULT_FRAME,
+  strokes: [ring, { width: 4, color: '#c9a227' }],
+});
+
+const transparentOps = framePaint(
+  frameGeometry(
+    withRing({ width: 24, color: '#f7f4ec00', ornament: { motif: 'kufic', ink: '#1a3a3f' } }),
+    IMAGE,
+  ),
+);
+assert(transparentOps.length === 3, 'a transparent ornamented ring should paint ink only');
+const inkOp = transparentOps.find((op) => op.clip != null);
+assert(inkOp?.fill === '#1a3a3f', 'ornament ink should be clipped to its ring');
+assert(
+  transparentOps.every((op) => op.fill !== '#f7f4ec00'),
+  'a transparent ground should not paint',
+);
+
+const thinOps = framePaint(
+  frameGeometry(
+    withRing({ width: 3, color: '#1a3a3f', ornament: { motif: 'khatam', ink: '#c9a227' } }),
+    IMAGE,
+  ),
+);
+assert(thinOps.length === 3, 'a 3px ornamented ring should paint its ground only');
+assert(
+  thinOps.every((op) => op.clip == null),
+  'a ring too thin for ink should carry no clipped op',
+);
+
+const ornateGeometry = frameGeometry(
+  withRing({ width: 24, color: '#1a3a3f', ornament: { motif: 'interlace', ink: '#c9a227' } }),
+  IMAGE,
+);
+const firstPaint = JSON.stringify(framePaint(ornateGeometry));
+assert(
+  firstPaint === JSON.stringify(framePaint(ornateGeometry)),
+  'paint ops must be deterministic',
+);
+assert(framePaint(ornateGeometry).length === 4, 'an ornate ring should paint ground + ink');
 
 console.log('ornament verify: ok');

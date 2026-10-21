@@ -1,4 +1,6 @@
 import { frameGeometry } from './frame.geometry.ts';
+import { framePaint } from './frame.paint.ts';
+import { roundedRectPath } from './frame.path.ts';
 import type { Frame } from './frame.schema.ts';
 
 export const MAX_BITMAP_EDGE = 8192;
@@ -8,34 +10,6 @@ export type RenderFrameResult = {
   canvas: HTMLCanvasElement;
   downscaled: boolean;
 };
-
-function parseAlpha(color: string): number {
-  if (color.length === 9) {
-    return Number.parseInt(color.slice(7, 9), 16) / 255;
-  }
-  return 1;
-}
-
-function traceRoundedRect(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  radius: number,
-): void {
-  const r = Math.max(0, Math.min(radius, width / 2, height / 2));
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + width - r, y);
-  ctx.arcTo(x + width, y, x + width, y + r, r);
-  ctx.lineTo(x + width, y + height - r);
-  ctx.arcTo(x + width, y + height, x + width - r, y + height, r);
-  ctx.lineTo(x + r, y + height);
-  ctx.arcTo(x, y + height, x, y + height - r, r);
-  ctx.lineTo(x, y + r);
-  ctx.arcTo(x, y, x + r, y, r);
-  ctx.closePath();
-}
 
 export function renderFrame(bitmap: ImageBitmap, frame: Frame): RenderFrameResult {
   const imageSize = { width: bitmap.width, height: bitmap.height };
@@ -58,57 +32,27 @@ export function renderFrame(bitmap: ImageBitmap, frame: Frame): RenderFrameResul
     ctx.scale(scale, scale);
   }
 
-  const { matBox, totalThickness, matPadding, radius, matColor, rings, roundImage } = geometry;
-  const matX = totalThickness;
-  const matY = totalThickness;
-  const matW = matBox.width;
-  const matH = matBox.height;
-
-  for (const ring of rings) {
-    if (parseAlpha(ring.color) === 0) {
-      continue;
+  for (const op of framePaint(geometry)) {
+    ctx.save();
+    if (op.clip != null) {
+      ctx.clip(new Path2D(op.clip), 'evenodd');
     }
-
-    ctx.beginPath();
-    traceRoundedRect(
-      ctx,
-      matX - ring.outerInset,
-      matY - ring.outerInset,
-      matW + ring.outerInset * 2,
-      matH + ring.outerInset * 2,
-      radius + ring.outerInset,
-    );
-    traceRoundedRect(
-      ctx,
-      matX - ring.innerInset,
-      matY - ring.innerInset,
-      matW + ring.innerInset * 2,
-      matH + ring.innerInset * 2,
-      radius + ring.innerInset,
-    );
-    ctx.fillStyle = ring.color;
-    ctx.fill('evenodd');
+    ctx.fillStyle = op.fill;
+    ctx.fill(new Path2D(op.d), op.fillRule);
+    ctx.restore();
   }
 
-  ctx.beginPath();
-  traceRoundedRect(ctx, matX, matY, matW, matH, radius);
-  ctx.fillStyle = matColor;
-  ctx.fill();
+  const { totalThickness, matPadding, radius, roundImage } = geometry;
+  const imageX = totalThickness + matPadding;
+  const imageY = totalThickness + matPadding;
 
   if (roundImage) {
     ctx.save();
-    ctx.beginPath();
-    traceRoundedRect(
-      ctx,
-      matX + matPadding,
-      matY + matPadding,
-      imageSize.width,
-      imageSize.height,
-      radius,
+    ctx.clip(
+      new Path2D(roundedRectPath(imageX, imageY, imageSize.width, imageSize.height, radius)),
     );
-    ctx.clip();
   }
-  ctx.drawImage(bitmap, matX + matPadding, matY + matPadding, imageSize.width, imageSize.height);
+  ctx.drawImage(bitmap, imageX, imageY, imageSize.width, imageSize.height);
   if (roundImage) {
     ctx.restore();
   }

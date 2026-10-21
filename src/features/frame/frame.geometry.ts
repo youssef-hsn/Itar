@@ -1,4 +1,4 @@
-import type { Frame } from './frame.schema.ts';
+import type { Frame, Ornament } from './frame.schema.ts';
 
 export type Size = {
   width: number;
@@ -10,6 +10,7 @@ export type RingInset = {
   outerInset: number;
   width: number;
   color: string;
+  ornament?: Ornament;
 };
 
 export type FrameGeometry = {
@@ -41,6 +42,7 @@ export function frameGeometry(frame: Frame, imageSize: Size): FrameGeometry {
       outerInset: cumulative,
       width: stroke.width,
       color: stroke.color,
+      ...(stroke.ornament ? { ornament: stroke.ornament } : {}),
     });
   }
 

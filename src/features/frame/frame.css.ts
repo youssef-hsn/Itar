@@ -1,12 +1,6 @@
 import type { CSSProperties } from 'react';
 import type { FrameGeometry } from './frame.geometry.ts';
-
-function parseAlpha(color: string): number {
-  if (color.length === 9) {
-    return Number.parseInt(color.slice(7, 9), 16) / 255;
-  }
-  return 1;
-}
+import { parseAlpha } from './frame.paint.ts';
 
 export function frameCss(geometry: FrameGeometry): CSSProperties {
   let spread = 0;
