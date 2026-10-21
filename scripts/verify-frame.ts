@@ -1,6 +1,6 @@
 import { classifyDropAsset } from '../src/features/frame/dropAssets.ts';
 import { decodeFrame, encodeFrame } from '../src/features/frame/frame.codec.ts';
-import { frameCss } from '../src/features/frame/frame.css.ts';
+import { frameCss, frameMatCss } from '../src/features/frame/frame.css.ts';
 import { frameGeometry } from '../src/features/frame/frame.geometry.ts';
 import { DEFAULT_FRAME, frameSchema } from '../src/features/frame/frame.schema.ts';
 import {
@@ -221,6 +221,13 @@ assert(
 assert(
   decodeFrame('x.24.f7f4ec.0~16-1a3a3f') === null,
   'non-numeric codec versions should be rejected',
+);
+
+const matCss = frameMatCss(previewGeometry);
+assert(matCss.boxShadow === undefined, 'mat CSS must not paint rings as box-shadows');
+assert(
+  matCss.margin === previewGeometry.totalThickness,
+  'mat CSS must inset by stroke thickness so the ring SVG fits composedSize',
 );
 
 console.log('frame verify: ok');

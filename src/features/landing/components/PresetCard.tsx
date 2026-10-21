@@ -1,7 +1,7 @@
 import { type MouseEvent, useEffect, useRef, useState } from 'react';
+import { FramedBox } from '#/features/frame/components/FramedBox.tsx';
 import { ScaleToFit } from '#/features/frame/components/ScaleToFit.tsx';
 import { encodeFrame } from '#/features/frame/frame.codec.ts';
-import { frameCss } from '#/features/frame/frame.css.ts';
 import { frameGeometry } from '#/features/frame/frame.geometry.ts';
 import type { Preset } from '#/features/frame/frame.schema.ts';
 import { cn } from '#/lib/utils.ts';
@@ -23,7 +23,6 @@ export const PresetCard = ({ preset, preview, onSelect, className }: PresetCardP
   const imageSize = preview?.size ?? SAMPLE_SIZE;
   const geometry = frameGeometry(preset.frame, imageSize);
   const { composedSize } = geometry;
-  const frameStyle = frameCss(geometry);
   const scale = Math.min(
     1,
     boxSize.width / composedSize.width,
@@ -69,7 +68,7 @@ export const PresetCard = ({ preset, preview, onSelect, className }: PresetCardP
         className="flex aspect-[13/10] w-full max-w-full items-center justify-center"
       >
         <ScaleToFit width={composedSize.width} height={composedSize.height} scale={scale}>
-          <div style={frameStyle}>
+          <FramedBox geometry={geometry}>
             {preview ? (
               <img
                 src={preview.url}
@@ -91,7 +90,7 @@ export const PresetCard = ({ preset, preview, onSelect, className }: PresetCardP
                 aria-hidden="true"
               />
             )}
-          </div>
+          </FramedBox>
         </ScaleToFit>
       </div>
 

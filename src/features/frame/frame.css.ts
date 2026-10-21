@@ -2,6 +2,18 @@ import type { CSSProperties } from 'react';
 import type { FrameGeometry } from './frame.geometry.ts';
 import { parseAlpha } from './frame.paint.ts';
 
+export function frameMatCss(geometry: FrameGeometry): CSSProperties {
+  return {
+    display: 'block',
+    boxSizing: 'border-box',
+    padding: geometry.matPadding,
+    backgroundColor: geometry.matColor,
+    borderRadius: geometry.radius,
+    margin: geometry.totalThickness,
+    overflow: 'hidden',
+  };
+}
+
 export function frameCss(geometry: FrameGeometry): CSSProperties {
   let spread = 0;
   const shadows: string[] = [];
@@ -15,13 +27,7 @@ export function frameCss(geometry: FrameGeometry): CSSProperties {
   }
 
   return {
-    display: 'block',
-    boxSizing: 'border-box',
-    padding: geometry.matPadding,
-    backgroundColor: geometry.matColor,
-    borderRadius: geometry.radius,
+    ...frameMatCss(geometry),
     boxShadow: shadows.length > 0 ? shadows.join(', ') : undefined,
-    margin: geometry.totalThickness,
-    overflow: 'hidden',
   };
 }

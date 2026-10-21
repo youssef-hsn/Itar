@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '#/lib/utils.ts';
-import { frameCss } from '../frame.css.ts';
 import { frameGeometry } from '../frame.geometry.ts';
 import type { Frame } from '../frame.schema.ts';
+import { FramedBox } from './FramedBox.tsx';
 import { ScaleToFit } from './ScaleToFit.tsx';
 
 const PLACEHOLDER_SIZE = { width: 480, height: 360 };
@@ -22,7 +22,6 @@ export const FrameStage = ({ frame, bitmap, isDecoding = false, className }: Fra
   const imageSize = bitmap ? { width: bitmap.width, height: bitmap.height } : PLACEHOLDER_SIZE;
   const geometry = frameGeometry(frame, imageSize);
   const { composedSize } = geometry;
-  const frameStyle = frameCss(geometry);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -70,7 +69,7 @@ export const FrameStage = ({ frame, bitmap, isDecoding = false, className }: Fra
       )}
     >
       <ScaleToFit width={composedSize.width} height={composedSize.height} scale={scale}>
-        <div style={frameStyle}>
+        <FramedBox geometry={geometry}>
           {bitmap ? (
             <canvas
               ref={canvasRef}
@@ -94,7 +93,7 @@ export const FrameStage = ({ frame, bitmap, isDecoding = false, className }: Fra
               {isDecoding ? 'Opening image…' : 'your image'}
             </div>
           )}
-        </div>
+        </FramedBox>
       </ScaleToFit>
     </section>
   );
