@@ -72,7 +72,7 @@ assert(
 );
 
 assert(
-  decodeFrame('3.24.f7f4ec.0~16-1a3a3f') === null,
+  decodeFrame('4.24.f7f4ec.0~16-1a3a3f') === null,
   'unknown codec versions should be rejected',
 );
 
@@ -178,6 +178,49 @@ assert(
 assert(
   !frameSchema.safeParse(ornateStrokeFrame({ motif: 'khatam', ink: 'gold' })).success,
   'non-hex ornament ink should be rejected',
+);
+
+const ornateFrame = {
+  ...DEFAULT_FRAME,
+  strokes: [
+    { width: 16, color: '#1a3a3f', ornament: { motif: 'khatam' as const, ink: '#c9a227' } },
+    { width: 4, color: '#c9a227', name: 'Gilt' },
+  ],
+};
+
+verifyRoundTrip('ornate frame', ornateFrame);
+
+assert(
+  encodeFrame(ornateFrame) === '3.24.f7f4ec.0~16-1a3a3f*kc9a227~4-c9a227!Gilt',
+  'ornamented frames should encode as codec v3 with a * suffix',
+);
+assert(
+  encodeFrame(DEFAULT_FRAME) === '1.24.f7f4ec.0~16-1a3a3f~4-c9a227~2-1a3a3f',
+  'plain frames should stay on codec v1',
+);
+
+for (const broken of [
+  '3.24.f7f4ec.0~16-1a3a3f*zc9a227',
+  '3.24.f7f4ec.0~16-1a3a3f*k',
+  '3.24.f7f4ec.0~16-1a3a3f*',
+  '3.24.f7f4ec.0~16-1a3a3f*kgg0000',
+]) {
+  assert(decodeFrame(broken) === null, `malformed ornament ${broken} should decode to null`);
+}
+
+const starName = {
+  ...DEFAULT_FRAME,
+  strokes: [{ width: 4, color: '#1a3a3f', name: 'a*b' }],
+};
+verifyRoundTrip('star in name', starName);
+assert(
+  decodeFrame(encodeFrame(starName))?.strokes[0]?.name === 'a*b',
+  'a * inside a name must not be read as an ornament',
+);
+
+assert(
+  decodeFrame('x.24.f7f4ec.0~16-1a3a3f') === null,
+  'non-numeric codec versions should be rejected',
 );
 
 console.log('frame verify: ok');
