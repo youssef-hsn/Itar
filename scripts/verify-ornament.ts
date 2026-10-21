@@ -9,7 +9,7 @@ import {
 } from '../src/features/frame/frame.path.ts';
 import { DEFAULT_FRAME, type Frame } from '../src/features/frame/frame.schema.ts';
 import { bandInkPath } from '../src/features/frame/ornament/band.ts';
-import { MOTIFS } from '../src/features/frame/ornament/motif.ts';
+import { defaultOrnamentInk, MOTIFS } from '../src/features/frame/ornament/motif.ts';
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) {
@@ -145,5 +145,15 @@ assert(
   'paint ops must be deterministic',
 );
 assert(framePaint(ornateGeometry).length === 4, 'an ornate ring should paint ground + ink');
+
+assert(defaultOrnamentInk('#1a3a3f') === '#c9a227', 'a dark ground should default to gilt ink');
+assert(
+  defaultOrnamentInk('#C9A227') !== '#c9a227',
+  'a gilt ground must not default to the same gilt ink',
+);
+assert(
+  defaultOrnamentInk('#c9a22780') !== '#c9a227',
+  'ground alpha must not hide a same-colour clash',
+);
 
 console.log('ornament verify: ok');

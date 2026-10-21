@@ -5,13 +5,11 @@ import { PopoverContent } from '#/components/ui/popover.tsx';
 import { Separator } from '#/components/ui/separator.tsx';
 import { cn } from '#/lib/utils.ts';
 import { MAX_STROKE_NAME_LENGTH, type Stroke } from '../frame.schema.ts';
-import { MIN_ORNAMENT_WIDTH } from '../ornament/motif.ts';
+import { defaultOrnamentInk, MIN_ORNAMENT_WIDTH } from '../ornament/motif.ts';
 import { ColorField } from './ColorField.tsx';
 import { MotifField } from './MotifField.tsx';
 import { NumberField } from './NumberField.tsx';
 import { TextField } from './TextField.tsx';
-
-const DEFAULT_ORNAMENT_INK = '#c9a227';
 
 type StrokeEditorPopoverProps = {
   anchor?: HTMLElement | null;
@@ -51,7 +49,7 @@ export const StrokeEditorPopover = ({
   }
 
   const { ornament } = stroke;
-  const ink = ornament?.ink ?? DEFAULT_ORNAMENT_INK;
+  const ink = ornament?.ink ?? defaultOrnamentInk(stroke.color);
 
   return (
     <PopoverContent

@@ -14,4 +14,11 @@ export type Motif = {
 
 export const MIN_ORNAMENT_WIDTH = 4;
 
+const GILT_INK = '#c9a227';
+const TEAL_INK = '#1a3a3f';
+
+export function defaultOrnamentInk(ground: string): string {
+  return ground.slice(0, 7).toLowerCase() === GILT_INK ? TEAL_INK : GILT_INK;
+}
+
 export const MOTIFS: Record<MotifId, Motif> = { khatam, interlace, kufic, mihrab };
