@@ -18,7 +18,13 @@ export const MotifTile = ({ motif, ground, ink, size }: MotifTileProps) => {
   );
 
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      style={{ width: size, height: size }}
+      aria-hidden="true"
+    >
       <rect width={size} height={size} fill={ground} />
       <path d={d} fill={ink} />
     </svg>
