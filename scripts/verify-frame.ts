@@ -2,7 +2,7 @@ import { classifyDropAsset } from '../src/features/frame/dropAssets.ts';
 import { decodeFrame, encodeFrame } from '../src/features/frame/frame.codec.ts';
 import { frameCss, frameMatCss } from '../src/features/frame/frame.css.ts';
 import { frameGeometry } from '../src/features/frame/frame.geometry.ts';
-import { DEFAULT_FRAME, frameSchema } from '../src/features/frame/frame.schema.ts';
+import { DEFAULT_FRAME, frameSchema, PRESETS } from '../src/features/frame/frame.schema.ts';
 import {
   strokeDisplayName,
   strokeSpecLine,
@@ -228,6 +228,28 @@ assert(matCss.boxShadow === undefined, 'mat CSS must not paint rings as box-shad
 assert(
   matCss.margin === previewGeometry.totalThickness,
   'mat CSS must inset by stroke thickness so the ring SVG fits composedSize',
+);
+
+assert(
+  strokeSpecLine({ width: 24, color: '#1a3a3f', ornament: { motif: 'kufic', ink: '#c9a227' } }) ===
+    '24 px · Kufic key',
+  'ornamented strokes should name their pattern',
+);
+assert(
+  strokeSpecLine({
+    width: 24,
+    color: '#1a3a3f00',
+    ornament: { motif: 'kufic', ink: '#c9a227' },
+  }) === '24 px · Kufic key',
+  'a transparent-ground ornament is a pattern, not a gap',
+);
+
+for (const preset of PRESETS) {
+  verifyRoundTrip(`preset ${preset.id}`, preset.frame);
+}
+assert(
+  PRESETS.some((preset) => preset.frame.strokes.some((stroke) => stroke.ornament)),
+  'at least one preset should carry an ornament',
 );
 
 console.log('frame verify: ok');

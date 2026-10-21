@@ -1,4 +1,5 @@
 import type { Stroke } from './frame.schema.ts';
+import { MOTIFS } from './ornament/motif.ts';
 
 const SWATCH_MIN_HEIGHT = 2;
 const SWATCH_MAX_HEIGHT = 24;
@@ -19,6 +20,9 @@ export const strokeDisplayName = (stroke: Stroke, position: number): string => {
 };
 
 export const strokeSpecLine = (stroke: Stroke): string => {
+  if (stroke.ornament != null) {
+    return `${stroke.width} px · ${MOTIFS[stroke.ornament.motif].label}`;
+  }
   const alpha = strokeAlphaPercent(stroke);
   if (alpha === 0) {
     return `${stroke.width} px · gap`;

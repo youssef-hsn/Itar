@@ -1,7 +1,9 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { cn } from '#/lib/utils.ts';
 import type { Stroke } from '../frame.schema.ts';
+import { MOTIFS } from '../ornament/motif.ts';
 import { strokeSpecLine, strokeSwatchHeight } from '../strokeLabel.ts';
+import { MotifTile } from './MotifTile.tsx';
 
 type StrokeSlabProps = {
   stroke: Stroke;
@@ -26,10 +28,19 @@ const StrokeSwatch = ({ stroke }: { stroke: Stroke }) => (
     style={{ background: CHECKER }}
     aria-hidden="true"
   >
-    <span
-      className="w-full"
-      style={{ height: strokeSwatchHeight(stroke), backgroundColor: stroke.color }}
-    />
+    {stroke.ornament ? (
+      <MotifTile
+        motif={MOTIFS[stroke.ornament.motif]}
+        ground={stroke.color}
+        ink={stroke.ornament.ink}
+        size={32}
+      />
+    ) : (
+      <span
+        className="w-full"
+        style={{ height: strokeSwatchHeight(stroke), backgroundColor: stroke.color }}
+      />
+    )}
   </span>
 );
 

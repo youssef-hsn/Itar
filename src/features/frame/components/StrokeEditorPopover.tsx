@@ -5,9 +5,13 @@ import { PopoverContent } from '#/components/ui/popover.tsx';
 import { Separator } from '#/components/ui/separator.tsx';
 import { cn } from '#/lib/utils.ts';
 import { MAX_STROKE_NAME_LENGTH, type Stroke } from '../frame.schema.ts';
+import { MIN_ORNAMENT_WIDTH } from '../ornament/motif.ts';
 import { ColorField } from './ColorField.tsx';
+import { MotifField } from './MotifField.tsx';
 import { NumberField } from './NumberField.tsx';
 import { TextField } from './TextField.tsx';
+
+const DEFAULT_ORNAMENT_INK = '#c9a227';
 
 type StrokeEditorPopoverProps = {
   anchor?: HTMLElement | null;
@@ -45,6 +49,9 @@ export const StrokeEditorPopover = ({
   if (!stroke) {
     return null;
   }
+
+  const { ornament } = stroke;
+  const ink = ornament?.ink ?? DEFAULT_ORNAMENT_INK;
 
   return (
     <PopoverContent
@@ -89,7 +96,32 @@ export const StrokeEditorPopover = ({
         max={200}
       />
 
-      <ColorField label="Color" value={stroke.color} onChange={(color) => onUpdate({ color })} />
+      <ColorField
+        label={ornament ? 'Ground color' : 'Color'}
+        value={stroke.color}
+        onChange={(color) => onUpdate({ color })}
+      />
+
+      <MotifField
+        value={ornament?.motif ?? null}
+        ground={stroke.color}
+        ink={ink}
+        onChange={(motif) => onUpdate({ ornament: motif == null ? undefined : { motif, ink } })}
+      />
+
+      {ornament && (
+        <ColorField
+          label="Pattern color"
+          value={ornament.ink}
+          onChange={(nextInk) => onUpdate({ ornament: { ...ornament, ink: nextInk } })}
+        />
+      )}
+
+      {ornament && stroke.width < MIN_ORNAMENT_WIDTH && (
+        <p className="type-caption text-muted-foreground">
+          Patterns show at {MIN_ORNAMENT_WIDTH} px and wider.
+        </p>
+      )}
 
       <Separator />
 

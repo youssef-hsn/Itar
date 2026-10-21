@@ -102,6 +102,37 @@ export const PRESETS: Preset[] = [
       ],
     },
   },
+  {
+    id: 'star-band',
+    name: 'Star Band',
+    frame: {
+      padding: 24,
+      matColor: '#f7f4ec',
+      radius: 0,
+      roundImage: false,
+      strokes: [
+        { width: 3, color: '#c9a227' },
+        { width: 28, color: '#1a3a3f', ornament: { motif: 'khatam', ink: '#c9a227' } },
+        { width: 3, color: '#c9a227' },
+      ],
+    },
+  },
+  {
+    id: 'kufic-key',
+    name: 'Kufic Key',
+    frame: {
+      padding: 28,
+      matColor: '#f7f4ec',
+      radius: 0,
+      roundImage: false,
+      strokes: [
+        { width: 2, color: '#1a3a3f' },
+        { width: 4, color: '#f7f4ec00' },
+        { width: 24, color: '#f7f4ec', ornament: { motif: 'kufic', ink: '#1a3a3f' } },
+        { width: 6, color: '#1a3a3f' },
+      ],
+    },
+  },
 ];
 
 export const DEFAULT_FRAME = PRESETS[0].frame;
