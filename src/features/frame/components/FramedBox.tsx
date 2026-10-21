@@ -13,7 +13,10 @@ export const FramedBox = ({ geometry, children }: FramedBoxProps) => {
   const { composedSize } = geometry;
 
   return (
-    <div className="relative" style={{ width: composedSize.width, height: composedSize.height }}>
+    <div
+      className="relative flow-root"
+      style={{ width: composedSize.width, height: composedSize.height }}
+    >
       <FrameRings ops={framePaint(geometry)} size={composedSize} />
       <div className="relative" style={frameMatCss(geometry)}>
         {children}
