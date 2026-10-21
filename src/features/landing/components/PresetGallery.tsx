@@ -42,8 +42,8 @@ export const PresetGallery = () => {
   );
 
   const status = preview
-    ? 'Your photo, in all four frames. Pick one to keep going.'
-    : 'Drop a photo anywhere on this page to see it in all four.';
+    ? 'Your photo, in every frame. Pick one to keep going.'
+    : 'Drop a photo anywhere on this page to see it in each frame.';
 
   return (
     <div className="flex flex-col gap-6">
