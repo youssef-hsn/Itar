@@ -15,7 +15,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "verify": "node --experimental-strip-types scripts/verify-frame.ts && node --experimental-strip-types scripts/verify-theme.ts && node --experimental-strip-types scripts/verify-landing.ts",
+    "verify": "node --experimental-strip-types scripts/verify-frame.ts && node --experimental-strip-types scripts/verify-ornament.ts && node --experimental-strip-types scripts/verify-theme.ts && node --experimental-strip-types scripts/verify-landing.ts",
     "typecheck": "tsc --noEmit",
     "format": "biome format --write .",
     "lint": "biome lint .",
