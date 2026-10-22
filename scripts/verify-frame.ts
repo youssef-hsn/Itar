@@ -9,6 +9,7 @@ import {
   MOTIF_IDS,
   PRESETS,
 } from '../src/features/frame/frame.schema.ts';
+import { withMotif } from '../src/features/frame/ornamentPatch.ts';
 import {
   strokeDisplayName,
   strokeSpecLine,
@@ -327,6 +328,32 @@ for (const preset of PRESETS) {
 assert(
   PRESETS.some((preset) => preset.frame.strokes.some((stroke) => stroke.ornament)),
   'at least one preset should carry an ornament',
+);
+
+const customKufic = {
+  ...DEFAULT_PATTERN,
+  motif: 'kufic' as const,
+  ink: '#c9a227',
+  corner: 'rosette' as const,
+  density: 'wide' as const,
+  mirror: true,
+};
+const switched = withMotif(customKufic, 'khatam', '#c9a227');
+assert(
+  switched?.motif === 'khatam' &&
+    switched.corner === 'rosette' &&
+    switched.density === 'wide' &&
+    switched.mirror === true,
+  'switching motif must keep corner, density and mirror',
+);
+assert(
+  withMotif(customKufic, null, '#c9a227') === undefined,
+  'clearing the motif drops the ornament',
+);
+const fresh = withMotif(undefined, 'khatam', '#c9a227');
+assert(
+  JSON.stringify(fresh) === JSON.stringify({ ...DEFAULT_PATTERN, motif: 'khatam', ink: '#c9a227' }),
+  'a first motif must start from the default pattern',
 );
 
 console.log('frame verify: ok');
