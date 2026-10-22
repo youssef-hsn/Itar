@@ -163,6 +163,20 @@ assert(
   'the lattice corner is its own tile',
 );
 
+const stepPoints = MOTIFS.stepInterlace.tile().flatMap(commandPoints);
+assert(
+  MOTIFS.stepInterlace.tile().every((command) => command.op !== 'C'),
+  'step interlace must be all straight segments',
+);
+assert(
+  !hasPoint(stepPoints, 0.3, 0.6) && !hasPoint(stepPoints, 0.7, 0.4),
+  'step interlace strands must cross as stepped diagonals, not stack into boxes',
+);
+assert(
+  hasPoint(stepPoints, 0.475, 0.4) && hasPoint(stepPoints, 0.4, 0.6),
+  'step interlace must step along the diagonal with an even 0.2 weight',
+);
+
 const bandRect = { x: 0, y: 0, width: 200, height: 100 };
 const khatamPattern = { ...DEFAULT_PATTERN, motif: 'khatam' } as const;
 const kuficPattern = { ...DEFAULT_PATTERN, motif: 'kufic' } as const;
