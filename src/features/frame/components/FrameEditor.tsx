@@ -9,10 +9,11 @@ import { Toaster } from '#/components/ui/sonner.tsx';
 import { cn } from '#/lib/utils.ts';
 import { EXPORT_DOWNSCALE_NOTICE, exportPng, renderFrame } from '../frame.canvas.ts';
 import { decodeFrame } from '../frame.codec.ts';
-import { PRESETS } from '../frame.schema.ts';
+import { type MotifId, PRESETS } from '../frame.schema.ts';
 import { useFrameState } from '../hooks/useFrameState.ts';
 import { useImageDrop } from '../hooks/useImageDrop.ts';
 import { takeStashedImage } from '../imageHandoff.ts';
+import { type MotifPreview, withMotifPreview } from '../ornamentPatch.ts';
 import { DropOverlay } from './DropOverlay.tsx';
 import { ExportBar } from './ExportBar.tsx';
 import { FrameStage } from './FrameStage.tsx';
@@ -56,6 +57,7 @@ function FrameEditorInner() {
   } = useImageDrop();
 
   const [invalidUrlSettings, setInvalidUrlSettings] = useState(false);
+  const [motifPreview, setMotifPreview] = useState<MotifPreview | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [exportFailed, setExportFailed] = useState<string | null>(null);
   const [exportDownscaleNotice, setExportDownscaleNotice] = useState<string | null>(null);
@@ -160,6 +162,14 @@ function FrameEditorInner() {
     }
   }, []);
 
+  const handlePreviewMotif = useCallback((index: number, motif: MotifId | null) => {
+    setMotifPreview({ index, motif });
+  }, []);
+
+  const handlePreviewEnd = useCallback(() => {
+    setMotifPreview(null);
+  }, []);
+
   const handleAddStroke = useCallback(() => {
     addStroke({ width: 4, color: '#1a3a3f' });
   }, [addStroke]);
@@ -170,7 +180,11 @@ function FrameEditorInner() {
   return (
     <div className="mx-auto w-full max-w-[var(--container-max)] px-4 py-8">
       <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
-        <FrameStage frame={frame} bitmap={bitmap} isDecoding={isDecoding} />
+        <FrameStage
+          frame={withMotifPreview(frame, motifPreview)}
+          bitmap={bitmap}
+          isDecoding={isDecoding}
+        />
 
         <aside
           className={cn(
@@ -211,6 +225,8 @@ function FrameEditorInner() {
             onReorder={reorderStroke}
             onRemove={removeStroke}
             onAdd={handleAddStroke}
+            onPreviewMotif={handlePreviewMotif}
+            onPreviewEnd={handlePreviewEnd}
             maxStrokesReached={maxStrokesReached}
           />
 

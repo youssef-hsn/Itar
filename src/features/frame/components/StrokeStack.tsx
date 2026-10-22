@@ -23,7 +23,7 @@ import { Alert, AlertDescription } from '#/components/ui/alert.tsx';
 import { Button } from '#/components/ui/button.tsx';
 import { Popover } from '#/components/ui/popover.tsx';
 import { cn } from '#/lib/utils.ts';
-import type { Stroke } from '../frame.schema.ts';
+import type { MotifId, Stroke } from '../frame.schema.ts';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion.ts';
 import { useStrokeIds } from '../hooks/useStrokeIds.ts';
 import { strokeDisplayName } from '../strokeLabel.ts';
@@ -37,6 +37,8 @@ type StrokeStackProps = {
   onReorder: (fromIndex: number, toIndex: number) => void;
   onRemove: (index: number) => void;
   onAdd: () => void;
+  onPreviewMotif: (index: number, motif: MotifId | null) => void;
+  onPreviewEnd: () => void;
   maxStrokesReached: boolean;
   className?: string;
 };
@@ -54,6 +56,8 @@ export const StrokeStack = ({
   onReorder,
   onRemove,
   onAdd,
+  onPreviewMotif,
+  onPreviewEnd,
   maxStrokesReached,
   className,
 }: StrokeStackProps) => {
@@ -289,6 +293,12 @@ export const StrokeStack = ({
           }}
           onMoveOutward={() => handleMove(1)}
           onMoveInward={() => handleMove(-1)}
+          onPreviewMotif={(motif) => {
+            if (editingIndex !== null) {
+              onPreviewMotif(editingIndex, motif);
+            }
+          }}
+          onPreviewEnd={onPreviewEnd}
           onRemove={handleRemove}
           onClose={() => setEditingIndex(null)}
           canMoveOutward={editingIndex !== null && editingIndex < strokes.length - 1}

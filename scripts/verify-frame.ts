@@ -9,7 +9,7 @@ import {
   MOTIF_IDS,
   PRESETS,
 } from '../src/features/frame/frame.schema.ts';
-import { withMotif } from '../src/features/frame/ornamentPatch.ts';
+import { withMotif, withMotifPreview } from '../src/features/frame/ornamentPatch.ts';
 import {
   strokeDisplayName,
   strokeSpecLine,
@@ -354,6 +354,37 @@ const fresh = withMotif(undefined, 'khatam', '#c9a227');
 assert(
   JSON.stringify(fresh) === JSON.stringify({ ...DEFAULT_PATTERN, motif: 'khatam', ink: '#c9a227' }),
   'a first motif must start from the default pattern',
+);
+
+const previewBase = {
+  ...DEFAULT_FRAME,
+  strokes: [
+    { width: 16, color: '#1a3a3f' },
+    { width: 4, color: '#c9a227', ornament: customKufic },
+  ],
+};
+assert(withMotifPreview(previewBase, null) === previewBase, 'no preview returns the same frame');
+assert(
+  withMotifPreview(previewBase, { index: 9, motif: 'khatam' }) === previewBase,
+  'an out-of-range preview is ignored',
+);
+assert(
+  withMotifPreview(previewBase, { index: 0, motif: 'khatam' }).strokes[0]?.ornament?.ink ===
+    '#c9a227',
+  'previewing on a plain stroke uses the default ink',
+);
+assert(
+  withMotifPreview(previewBase, { index: 1, motif: null }).strokes[1]?.ornament === undefined,
+  'previewing None removes the ornament',
+);
+const previewed = withMotifPreview(previewBase, { index: 1, motif: 'khatam' }).strokes[1]?.ornament;
+assert(
+  previewed?.motif === 'khatam' && previewed.density === 'wide' && previewed.mirror === true,
+  'a preview keeps the stroke pattern options',
+);
+assert(
+  previewBase.strokes[1]?.ornament?.motif === 'kufic',
+  'a preview must not mutate the committed frame',
 );
 
 console.log('frame verify: ok');

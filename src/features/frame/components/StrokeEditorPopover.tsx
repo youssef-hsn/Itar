@@ -4,7 +4,13 @@ import { Button } from '#/components/ui/button.tsx';
 import { PopoverContent } from '#/components/ui/popover.tsx';
 import { Separator } from '#/components/ui/separator.tsx';
 import { cn } from '#/lib/utils.ts';
-import { CORNER_STYLES, DENSITIES, MAX_STROKE_NAME_LENGTH, type Stroke } from '../frame.schema.ts';
+import {
+  CORNER_STYLES,
+  DENSITIES,
+  MAX_STROKE_NAME_LENGTH,
+  type MotifId,
+  type Stroke,
+} from '../frame.schema.ts';
 import { CORNER_LABELS } from '../ornament/cornerStyle.ts';
 import { defaultOrnamentInk, MIN_ORNAMENT_WIDTH, MOTIFS } from '../ornament/motif.ts';
 import { withMotif } from '../ornamentPatch.ts';
@@ -17,8 +23,6 @@ import { TextField } from './TextField.tsx';
 
 const CORNER_TILE_SIZE = 24;
 
-const NOOP = () => {};
-
 const DENSITY_OPTIONS = DENSITIES.map((density) => ({
   value: density,
   label: density.charAt(0).toUpperCase() + density.slice(1),
@@ -29,6 +33,8 @@ type StrokeEditorPopoverProps = {
   stroke: Stroke | null;
   label: string;
   onUpdate: (patch: Partial<Stroke>) => void;
+  onPreviewMotif: (motif: MotifId | null) => void;
+  onPreviewEnd: () => void;
   onMoveOutward: () => void;
   onMoveInward: () => void;
   onRemove: () => void;
@@ -45,6 +51,8 @@ export const StrokeEditorPopover = ({
   stroke,
   label,
   onUpdate,
+  onPreviewMotif,
+  onPreviewEnd,
   onMoveOutward,
   onMoveInward,
   onRemove,
@@ -121,8 +129,8 @@ export const StrokeEditorPopover = ({
         ground={stroke.color}
         ink={ink}
         onChange={(motif) => onUpdate({ ornament: withMotif(ornament, motif, ink) })}
-        onPreview={NOOP}
-        onPreviewEnd={NOOP}
+        onPreview={onPreviewMotif}
+        onPreviewEnd={onPreviewEnd}
       />
 
       {ornament && (
