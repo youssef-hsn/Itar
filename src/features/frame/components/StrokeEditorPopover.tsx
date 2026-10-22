@@ -4,15 +4,10 @@ import { Button } from '#/components/ui/button.tsx';
 import { PopoverContent } from '#/components/ui/popover.tsx';
 import { Separator } from '#/components/ui/separator.tsx';
 import { cn } from '#/lib/utils.ts';
-import {
-  CORNER_STYLES,
-  DEFAULT_PATTERN,
-  DENSITIES,
-  MAX_STROKE_NAME_LENGTH,
-  type Stroke,
-} from '../frame.schema.ts';
+import { CORNER_STYLES, DENSITIES, MAX_STROKE_NAME_LENGTH, type Stroke } from '../frame.schema.ts';
 import { CORNER_LABELS } from '../ornament/cornerStyle.ts';
 import { defaultOrnamentInk, MIN_ORNAMENT_WIDTH, MOTIFS } from '../ornament/motif.ts';
+import { withMotif } from '../ornamentPatch.ts';
 import { ColorField } from './ColorField.tsx';
 import { CornerTile } from './CornerTile.tsx';
 import { MotifField } from './MotifField.tsx';
@@ -78,7 +73,10 @@ export const StrokeEditorPopover = ({
       aria-label={`Edit ${label}`}
       initialFocus={nameFieldRef}
       finalFocus={finalFocus}
-      className={cn('flex flex-col gap-4', className)}
+      className={cn(
+        'flex max-h-[var(--available-height)] flex-col gap-4 overflow-y-auto',
+        className,
+      )}
     >
       <div className="flex items-center justify-between gap-2">
         <h3 className="type-label text-foreground">{label}</h3>
@@ -120,11 +118,7 @@ export const StrokeEditorPopover = ({
         value={ornament?.motif ?? null}
         ground={stroke.color}
         ink={ink}
-        onChange={(motif) =>
-          onUpdate({
-            ornament: motif == null ? undefined : { ...DEFAULT_PATTERN, ...ornament, motif, ink },
-          })
-        }
+        onChange={(motif) => onUpdate({ ornament: withMotif(ornament, motif, ink) })}
       />
 
       {ornament && (
@@ -167,7 +161,7 @@ export const StrokeEditorPopover = ({
         />
       )}
 
-      {ornament && (
+      {ornament && MOTIFS[ornament.motif].isDirectional && (
         <Button
           variant="outline"
           aria-pressed={ornament.mirror}
