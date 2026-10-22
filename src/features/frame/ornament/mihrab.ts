@@ -1,4 +1,4 @@
-import type { PathCommand } from '../frame.path.ts';
+import { type PathCommand, transformCommands } from '../frame.path.ts';
 import type { Motif } from './motif.ts';
 
 function arch(): PathCommand[] {
@@ -12,20 +12,21 @@ function arch(): PathCommand[] {
   ];
 }
 
+const CORNER_SCALE = 0.7;
+const HALF_DIAGONAL = Math.SQRT1_2;
+
 function cornerArch(): PathCommand[] {
-  return [
-    { op: 'M', to: { x: 0.88, y: 0.88 } },
-    { op: 'L', to: { x: 0.4, y: 0.88 } },
-    { op: 'L', to: { x: 0.4, y: 0.7 } },
-    { op: 'Q', c: { x: 0.4, y: 0.3 }, to: { x: 0.15, y: 0.15 } },
-    { op: 'Q', c: { x: 0.3, y: 0.4 }, to: { x: 0.7, y: 0.4 } },
-    { op: 'L', to: { x: 0.88, y: 0.4 } },
-    { op: 'Z' },
-  ];
+  const scaled = CORNER_SCALE * HALF_DIAGONAL;
+  return transformCommands(arch(), {
+    origin: { x: 0.5 - scaled, y: 0.5 },
+    u: { x: scaled, y: -scaled },
+    v: { x: scaled, y: scaled },
+  });
 }
 
 export const mihrab: Motif = {
   id: 'mihrab',
+  isDirectional: false,
   label: 'Arches',
   tile: arch,
   corner: cornerArch,
