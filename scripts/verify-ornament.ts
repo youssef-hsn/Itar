@@ -7,7 +7,7 @@ import {
   roundedRectPath,
   toPathData,
 } from '../src/features/frame/frame.path.ts';
-import { DEFAULT_FRAME, type Frame } from '../src/features/frame/frame.schema.ts';
+import { DEFAULT_FRAME, type Frame, type MotifId } from '../src/features/frame/frame.schema.ts';
 import { bandInkPath } from '../src/features/frame/ornament/band.ts';
 import { defaultOrnamentInk, MOTIFS } from '../src/features/frame/ornament/motif.ts';
 
@@ -73,7 +73,7 @@ for (const motif of Object.values(MOTIFS)) {
   }
 }
 
-const SEAMS: Record<string, [number, number][]> = {
+const SEAMS: Record<MotifId, [number, number][]> = {
   khatam: [],
   interlace: [
     [0.15, 0.35],
@@ -81,6 +81,10 @@ const SEAMS: Record<string, [number, number][]> = {
   ],
   kufic: [[0.85, 1]],
   mihrab: [],
+  chevron: [[0.25, 0.45]],
+  chain: [[0.45, 0.55]],
+  hexagram: [],
+  dentil: [[0.8, 1]],
 };
 
 function hasPoint(points: { x: number; y: number }[], x: number, y: number): boolean {
@@ -88,7 +92,8 @@ function hasPoint(points: { x: number; y: number }[], x: number, y: number): boo
 }
 
 function sortedKeys(points: { x: number; y: number }[]): string[] {
-  return points.map((point) => `${point.x.toFixed(6)},${point.y.toFixed(6)}`).sort();
+  const keys = points.map((point) => `${point.x.toFixed(6)},${point.y.toFixed(6)}`);
+  return [...new Set(keys)].sort();
 }
 
 for (const motif of Object.values(MOTIFS)) {
@@ -99,7 +104,7 @@ for (const motif of Object.values(MOTIFS)) {
     sortedKeys(cornerPoints).join('|') === sortedKeys(transposed).join('|'),
     `${motif.id} corner must be symmetric about the diagonal`,
   );
-  for (const [a, b] of SEAMS[motif.id] ?? []) {
+  for (const [a, b] of SEAMS[motif.id]) {
     assert(
       hasPoint(tilePoints, 0, a) &&
         hasPoint(tilePoints, 0, b) &&

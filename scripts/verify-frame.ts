@@ -1,8 +1,13 @@
 import { classifyDropAsset } from '../src/features/frame/dropAssets.ts';
-import { decodeFrame, encodeFrame } from '../src/features/frame/frame.codec.ts';
+import { decodeFrame, encodeFrame, MOTIF_CODES } from '../src/features/frame/frame.codec.ts';
 import { frameCss, frameMatCss } from '../src/features/frame/frame.css.ts';
 import { frameGeometry } from '../src/features/frame/frame.geometry.ts';
-import { DEFAULT_FRAME, frameSchema, PRESETS } from '../src/features/frame/frame.schema.ts';
+import {
+  DEFAULT_FRAME,
+  frameSchema,
+  MOTIF_IDS,
+  PRESETS,
+} from '../src/features/frame/frame.schema.ts';
 import {
   strokeDisplayName,
   strokeSpecLine,
@@ -189,6 +194,18 @@ const ornateFrame = {
 };
 
 verifyRoundTrip('ornate frame', ornateFrame);
+
+for (const id of MOTIF_IDS) {
+  verifyRoundTrip(`${id} ornament`, {
+    ...DEFAULT_FRAME,
+    strokes: [{ width: 16, color: '#1a3a3f', ornament: { motif: id, ink: '#c9a227' } }],
+  });
+}
+
+assert(
+  new Set(Object.values(MOTIF_CODES)).size === MOTIF_IDS.length,
+  'every motif needs a unique codec code',
+);
 
 assert(
   encodeFrame(ornateFrame) === '3.24.f7f4ec.0~16-1a3a3f*kc9a227~4-c9a227!Gilt',

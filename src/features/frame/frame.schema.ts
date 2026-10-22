@@ -6,7 +6,16 @@ const hexColor = z
 
 export const MAX_STROKE_NAME_LENGTH = 24;
 
-export const MOTIF_IDS = ['khatam', 'interlace', 'kufic', 'mihrab'] as const;
+export const MOTIF_IDS = [
+  'khatam',
+  'interlace',
+  'kufic',
+  'mihrab',
+  'chevron',
+  'chain',
+  'hexagram',
+  'dentil',
+] as const;
 
 export type MotifId = (typeof MOTIF_IDS)[number];
 

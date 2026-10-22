@@ -4,11 +4,15 @@ const CODEC_VERSION_PLAIN = 1;
 const CODEC_VERSION_NAMED = 2;
 export const CODEC_VERSION_ORNATE = 3;
 
-const MOTIF_CODES: Record<MotifId, string> = {
+export const MOTIF_CODES: Record<MotifId, string> = {
   khatam: 'k',
   interlace: 'b',
   kufic: 'q',
   mihrab: 'm',
+  chevron: 'v',
+  chain: 'o',
+  hexagram: 'h',
+  dentil: 'd',
 };
 
 const MOTIF_BY_CODE = new Map(
