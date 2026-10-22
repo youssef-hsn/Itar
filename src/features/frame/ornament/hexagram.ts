@@ -22,6 +22,7 @@ function corner(): PathCommand[] {
 
 export const hexagram: Motif = {
   id: 'hexagram',
+  isDirectional: false,
   label: '6-point star',
   tile,
   corner,

@@ -20,6 +20,7 @@ function star(): PathCommand[] {
 
 export const khatam: Motif = {
   id: 'khatam',
+  isDirectional: false,
   label: '8-point star',
   tile: star,
   corner: star,

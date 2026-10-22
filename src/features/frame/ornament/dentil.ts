@@ -11,6 +11,7 @@ function corner(): PathCommand[] {
 
 export const dentil: Motif = {
   id: 'dentil',
+  isDirectional: false,
   label: 'Dentil',
   tile,
   corner,

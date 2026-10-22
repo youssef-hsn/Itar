@@ -25,6 +25,7 @@ function corner(): PathCommand[] {
 
 export const chevron: Motif = {
   id: 'chevron',
+  isDirectional: false,
   label: 'Chevron',
   tile,
   corner,

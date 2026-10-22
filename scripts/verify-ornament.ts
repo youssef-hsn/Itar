@@ -182,6 +182,30 @@ assert(
   'an unmirrored top edge must differ from its reflection',
 );
 
+const oddRect = { x: 0, y: 0, width: 220, height: 100 };
+const oddMirroredTop = pointsOf(bandInkPath(oddRect, 20, { ...kuficPattern, mirror: true }))
+  .filter((point) => point.y < 20)
+  .map((point) => point.x);
+assert(
+  [...new Set(oddMirroredTop.map(fmt))].sort().join('|') ===
+    [...new Set(oddMirroredTop.map((x) => fmt(220 - x)))].sort().join('|'),
+  'a mirrored top edge with an odd tile count must stay symmetric',
+);
+
+const evenRect = { x: 0, y: 0, width: 200, height: 120 };
+for (const motif of Object.values(MOTIFS)) {
+  const mirrored = sortedKeys(
+    pointsOf(bandInkPath(evenRect, 20, { ...kuficPattern, motif: motif.id, mirror: true })),
+  ).join('|');
+  const plain = sortedKeys(
+    pointsOf(bandInkPath(evenRect, 20, { ...kuficPattern, motif: motif.id, mirror: false })),
+  ).join('|');
+  assert(
+    motif.isDirectional === (mirrored !== plain),
+    `${motif.id} isDirectional must match whether mirror changes its ink`,
+  );
+}
+
 const shortRect = { x: 0, y: 0, width: 60, height: 60 };
 const shortMirrored = bandInkPath(shortRect, 20, { ...kuficPattern, mirror: true });
 assert(
@@ -225,6 +249,27 @@ const emptyInkOps = framePaint(
 assert(
   emptyInkOps.every((op) => op.clip == null),
   'an ornamented ring with empty ink should carry no clipped op',
+);
+
+const motifCornerOps = framePaint(
+  frameGeometry(
+    {
+      ...DEFAULT_FRAME,
+      padding: 0,
+      strokes: [
+        {
+          width: 20,
+          color: '#1a3a3f00',
+          ornament: { ...plainCorners, corner: 'motif', ink: '#c9a227' },
+        },
+      ],
+    },
+    { width: 0, height: 0 },
+  ),
+);
+assert(
+  motifCornerOps.some((op) => op.clip != null),
+  'an ornamented ring with motif corners should carry a clipped op',
 );
 
 const IMAGE = { width: 480, height: 360 };

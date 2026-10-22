@@ -12,6 +12,7 @@ import { mihrab } from './mihrab.ts';
 export type Motif = {
   id: MotifId;
   label: string;
+  isDirectional: boolean;
   tile: () => PathCommand[];
   corner: () => PathCommand[];
 };

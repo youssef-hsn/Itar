@@ -24,6 +24,7 @@ function corner(): PathCommand[] {
 
 export const interlace: Motif = {
   id: 'interlace',
+  isDirectional: false,
   label: 'Interlace',
   tile,
   corner,

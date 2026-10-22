@@ -53,7 +53,9 @@ function edgeTiles(edge: Edge, t: number, scale: number, isMirrored: boolean): A
     return [];
   }
 
-  const count = Math.max(1, Math.round(length / (t * scale)));
+  const base = Math.max(1, Math.round(length / (t * scale)));
+  const count =
+    isMirrored && base > 1 ? 2 * Math.max(1, Math.round(length / (2 * t * scale))) : base;
   const tileLength = length / count;
   return Array.from({ length: count }, (_, index) => {
     const isFlipped = isMirrored && 2 * index > count - 1;

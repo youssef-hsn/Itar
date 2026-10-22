@@ -22,6 +22,7 @@ function corner(): PathCommand[] {
 
 export const chain: Motif = {
   id: 'chain',
+  isDirectional: false,
   label: 'Chain',
   tile,
   corner,

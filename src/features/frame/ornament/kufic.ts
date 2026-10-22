@@ -26,6 +26,7 @@ function unionOf(rects: UnitRect[]): PathCommand[] {
 
 export const kufic: Motif = {
   id: 'kufic',
+  isDirectional: true,
   label: 'Kufic key',
   tile: () => unionOf(TILE_RECTS),
   corner: () => unionOf(CORNER_RECTS),
