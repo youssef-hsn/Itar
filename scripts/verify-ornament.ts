@@ -98,6 +98,16 @@ const SEAMS: Record<MotifId, [number, number][]> = {
     [0.15, 0.35],
     [0.65, 0.85],
   ],
+  braid: [
+    [0.1, 0.26],
+    [0.42, 0.58],
+    [0.74, 0.9],
+  ],
+  guilloche: [[0.4, 0.6]],
+  lattice: [
+    [0, 0.14],
+    [0.86, 1],
+  ],
   kufic: [[0.85, 1]],
   mihrab: [],
   chevron: [[0.25, 0.45]],
@@ -145,6 +155,12 @@ assert(
 assert(
   MOTIFS.angularInterlace.tile().every((command) => command.op !== 'C'),
   'angular interlace must be all straight segments',
+);
+
+assert(MOTIFS.braid.isDirectional, 'a three-strand braid leans one way and must offer mirror');
+assert(
+  toPathData(MOTIFS.lattice.corner()) === toPathData(MOTIFS.lattice.tile()),
+  'the lattice corner is its own tile',
 );
 
 const bandRect = { x: 0, y: 0, width: 200, height: 100 };
@@ -209,14 +225,23 @@ assert(
   'a mirrored top edge with an odd tile count must stay symmetric',
 );
 
+function subpathShapes(d: string): string {
+  return d
+    .split('M')
+    .filter((subpath) => subpath !== '')
+    .map((subpath) => sortedKeys(pointsOf(subpath)).join(' '))
+    .sort()
+    .join('|');
+}
+
 const evenRect = { x: 0, y: 0, width: 200, height: 120 };
 for (const motif of Object.values(MOTIFS)) {
-  const mirrored = sortedKeys(
-    pointsOf(bandInkPath(evenRect, 20, { ...kuficPattern, motif: motif.id, mirror: true })),
-  ).join('|');
-  const plain = sortedKeys(
-    pointsOf(bandInkPath(evenRect, 20, { ...kuficPattern, motif: motif.id, mirror: false })),
-  ).join('|');
+  const mirrored = subpathShapes(
+    bandInkPath(evenRect, 20, { ...kuficPattern, motif: motif.id, mirror: true }),
+  );
+  const plain = subpathShapes(
+    bandInkPath(evenRect, 20, { ...kuficPattern, motif: motif.id, mirror: false }),
+  );
   assert(
     motif.isDirectional === (mirrored !== plain),
     `${motif.id} isDirectional must match whether mirror changes its ink`,

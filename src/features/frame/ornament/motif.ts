@@ -1,13 +1,16 @@
 import type { PathCommand } from '../frame.path.ts';
 import type { MotifId } from '../frame.schema.ts';
 import { angularInterlace } from './angularInterlace.ts';
+import { braid } from './braid.ts';
 import { chain } from './chain.ts';
 import { chevron } from './chevron.ts';
 import { dentil } from './dentil.ts';
+import { guilloche } from './guilloche.ts';
 import { hexagram } from './hexagram.ts';
 import { interlace } from './interlace.ts';
 import { khatam } from './khatam.ts';
 import { kufic } from './kufic.ts';
+import { lattice } from './lattice.ts';
 import { mihrab } from './mihrab.ts';
 import { stepInterlace } from './stepInterlace.ts';
 
@@ -33,6 +36,9 @@ export const MOTIFS: Record<MotifId, Motif> = {
   interlace,
   angularInterlace,
   stepInterlace,
+  braid,
+  guilloche,
+  lattice,
   kufic,
   mihrab,
   chevron,

@@ -68,3 +68,19 @@ export function squareQuarterRing(center: Point, inner: number, outer: number): 
 export function flipVertical(vertices: Point[]): Point[] {
   return vertices.map((vertex) => ({ x: vertex.x, y: 1 - vertex.y })).reverse();
 }
+
+export function sCurveRibbon(
+  [s0, s1]: [number, number],
+  [e0, e1]: [number, number],
+  x0 = 0,
+  x1 = 1,
+): PathCommand[] {
+  const mid = (x0 + x1) / 2;
+  return [
+    { op: 'M', to: { x: x0, y: s0 } },
+    { op: 'C', c1: { x: mid, y: s0 }, c2: { x: mid, y: e0 }, to: { x: x1, y: e0 } },
+    { op: 'L', to: { x: x1, y: e1 } },
+    { op: 'C', c1: { x: mid, y: e1 }, c2: { x: mid, y: s1 }, to: { x: x0, y: s1 } },
+    { op: 'Z' },
+  ];
+}
