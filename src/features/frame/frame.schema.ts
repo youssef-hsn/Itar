@@ -9,6 +9,8 @@ export const MAX_STROKE_NAME_LENGTH = 24;
 export const MOTIF_IDS = [
   'khatam',
   'interlace',
+  'angularInterlace',
+  'stepInterlace',
   'kufic',
   'mihrab',
   'chevron',

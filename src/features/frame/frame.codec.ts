@@ -19,6 +19,8 @@ export const CODEC_VERSION_PATTERNED = 4;
 export const MOTIF_CODES: Record<MotifId, string> = {
   khatam: 'k',
   interlace: 'b',
+  angularInterlace: 'a',
+  stepInterlace: 's',
   kufic: 'q',
   mihrab: 'm',
   chevron: 'v',

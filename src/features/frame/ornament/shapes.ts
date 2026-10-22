@@ -1,4 +1,4 @@
-import type { PathCommand, Point } from '../frame.path.ts';
+import { type PathCommand, type Point, polygonCommands } from '../frame.path.ts';
 
 const CIRCLE_KAPPA = 0.5523;
 const QUARTER_TURNS: Point[] = [
@@ -48,4 +48,23 @@ export function quarterRing(center: Point, inner: number, outer: number): PathCo
     },
     { op: 'Z' },
   ];
+}
+
+export function squareQuarterRing(center: Point, inner: number, outer: number): PathCommand[] {
+  const at = (radius: number, dx: number, dy: number): Point => ({
+    x: center.x - radius * dx,
+    y: center.y - radius * dy,
+  });
+  return polygonCommands([
+    at(outer, 0, 1),
+    at(outer, 1, 1),
+    at(outer, 1, 0),
+    at(inner, 1, 0),
+    at(inner, 1, 1),
+    at(inner, 0, 1),
+  ]);
+}
+
+export function flipVertical(vertices: Point[]): Point[] {
+  return vertices.map((vertex) => ({ x: vertex.x, y: 1 - vertex.y })).reverse();
 }

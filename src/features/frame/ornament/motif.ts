@@ -1,5 +1,6 @@
 import type { PathCommand } from '../frame.path.ts';
 import type { MotifId } from '../frame.schema.ts';
+import { angularInterlace } from './angularInterlace.ts';
 import { chain } from './chain.ts';
 import { chevron } from './chevron.ts';
 import { dentil } from './dentil.ts';
@@ -8,6 +9,7 @@ import { interlace } from './interlace.ts';
 import { khatam } from './khatam.ts';
 import { kufic } from './kufic.ts';
 import { mihrab } from './mihrab.ts';
+import { stepInterlace } from './stepInterlace.ts';
 
 export type Motif = {
   id: MotifId;
@@ -29,6 +31,8 @@ export function defaultOrnamentInk(ground: string): string {
 export const MOTIFS: Record<MotifId, Motif> = {
   khatam,
   interlace,
+  angularInterlace,
+  stepInterlace,
   kufic,
   mihrab,
   chevron,

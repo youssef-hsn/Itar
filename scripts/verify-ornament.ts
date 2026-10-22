@@ -90,6 +90,14 @@ const SEAMS: Record<MotifId, [number, number][]> = {
     [0.15, 0.35],
     [0.65, 0.85],
   ],
+  angularInterlace: [
+    [0.15, 0.35],
+    [0.65, 0.85],
+  ],
+  stepInterlace: [
+    [0.15, 0.35],
+    [0.65, 0.85],
+  ],
   kufic: [[0.85, 1]],
   mihrab: [],
   chevron: [[0.25, 0.45]],
@@ -129,6 +137,15 @@ for (const motif of Object.values(MOTIFS)) {
     );
   }
 }
+
+assert(
+  MOTIFS.angularInterlace.label === 'Angular interlace' && !MOTIFS.angularInterlace.isDirectional,
+  'angular interlace is a symmetric twin of interlace',
+);
+assert(
+  MOTIFS.angularInterlace.tile().every((command) => command.op !== 'C'),
+  'angular interlace must be all straight segments',
+);
 
 const bandRect = { x: 0, y: 0, width: 200, height: 100 };
 const khatamPattern = { ...DEFAULT_PATTERN, motif: 'khatam' } as const;
