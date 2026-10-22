@@ -8,6 +8,7 @@ import {
   frameSchema,
   type MotifId,
   type Ornament,
+  type Stroke,
 } from './frame.schema.ts';
 
 const CODEC_VERSION_PLAIN = 1;
@@ -170,16 +171,21 @@ function decodeStrokes(raw: string): Frame['strokes'] | null {
   return strokes;
 }
 
+function pickVersion(strokes: Stroke[]): number {
+  if (strokes.some((stroke) => stroke.ornament && !hasDefaultPattern(stroke.ornament))) {
+    return CODEC_VERSION_PATTERNED;
+  }
+  if (strokes.some((stroke) => stroke.ornament)) {
+    return CODEC_VERSION_ORNATE;
+  }
+  if (strokes.some((stroke) => stroke.name)) {
+    return CODEC_VERSION_NAMED;
+  }
+  return CODEC_VERSION_PLAIN;
+}
+
 export function encodeFrame(frame: Frame): string {
-  const version = frame.strokes.some(
-    (stroke) => stroke.ornament && !hasDefaultPattern(stroke.ornament),
-  )
-    ? CODEC_VERSION_PATTERNED
-    : frame.strokes.some((stroke) => stroke.ornament)
-      ? CODEC_VERSION_ORNATE
-      : frame.strokes.some((stroke) => stroke.name)
-        ? CODEC_VERSION_NAMED
-        : CODEC_VERSION_PLAIN;
+  const version = pickVersion(frame.strokes);
   const matColor = encodeColor(frame.matColor);
   const strokes = encodeStrokes(frame.strokes);
   const radiusToken = `${frame.radius}${frame.roundImage ? 'i' : ''}`;
