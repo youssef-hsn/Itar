@@ -1,7 +1,6 @@
 import type { FrameGeometry, RingInset } from './frame.geometry.ts';
 import { roundedRectPath } from './frame.path.ts';
 import { bandInkPath, type Rect } from './ornament/band.ts';
-import { MOTIFS } from './ornament/motif.ts';
 
 export type PaintOp = {
   d: string;
@@ -46,11 +45,7 @@ function ringOps(geometry: FrameGeometry, ring: RingInset): PaintOp[] {
     return ops;
   }
 
-  const ink = bandInkPath(
-    insetRect(geometry, ring.outerInset),
-    ring.width,
-    MOTIFS[ring.ornament.motif],
-  );
+  const ink = bandInkPath(insetRect(geometry, ring.outerInset), ring.width, ring.ornament);
   if (ink !== '') {
     ops.push({ d: ink, fill: ring.ornament.ink, fillRule: 'nonzero', clip: ringPath });
   }

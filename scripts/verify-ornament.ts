@@ -8,12 +8,14 @@ import {
   toPathData,
 } from '../src/features/frame/frame.path.ts';
 import {
+  CORNER_STYLES,
   DEFAULT_FRAME,
   DEFAULT_PATTERN,
   type Frame,
   type MotifId,
 } from '../src/features/frame/frame.schema.ts';
 import { bandInkPath } from '../src/features/frame/ornament/band.ts';
+import { cornerCommands } from '../src/features/frame/ornament/cornerStyle.ts';
 import { defaultOrnamentInk, MOTIFS } from '../src/features/frame/ornament/motif.ts';
 
 function assert(condition: unknown, message: string): asserts condition {
@@ -63,7 +65,11 @@ for (const motif of Object.values(MOTIFS)) {
   for (const [part, commands] of [
     ['tile', motif.tile()],
     ['corner', motif.corner()],
+    ...CORNER_STYLES.map((style) => [`${style} corner`, cornerCommands(style, motif)] as const),
   ] as const) {
+    if (commands.length === 0) {
+      continue;
+    }
     assert(commands.at(-1)?.op === 'Z', `${motif.id} ${part} must end closed`);
     for (const point of commands.flatMap(commandPoints)) {
       assert(
@@ -125,20 +131,101 @@ for (const motif of Object.values(MOTIFS)) {
 }
 
 const bandRect = { x: 0, y: 0, width: 200, height: 100 };
-const starBand = bandInkPath(bandRect, 20, MOTIFS.khatam);
+const khatamPattern = { ...DEFAULT_PATTERN, motif: 'khatam' } as const;
+const kuficPattern = { ...DEFAULT_PATTERN, motif: 'kufic' } as const;
+const starBand = bandInkPath(bandRect, 20, khatamPattern);
 
 assert(starBand.length > 0, 'a 20px khatam band should produce ink');
-assert(starBand === bandInkPath(bandRect, 20, MOTIFS.khatam), 'band ink must be deterministic');
+assert(starBand === bandInkPath(bandRect, 20, khatamPattern), 'band ink must be deterministic');
 assert(!starBand.includes('NaN'), 'band ink must not contain NaN');
 assert(
   pathNumbers(starBand).every((n) => n >= 0 && n <= 200),
   'band ink must stay inside the outer rect',
 );
 
-const kuficMoves = bandInkPath(bandRect, 20, MOTIFS.kufic).match(/M/g)?.length;
+const kuficMoves = bandInkPath(bandRect, 20, kuficPattern).match(/M/g)?.length;
 assert(kuficMoves === 134, `kufic band should have 134 subpaths, got ${kuficMoves}`);
 
-assert(bandInkPath(bandRect, 3, MOTIFS.khatam) === '', 'bands under 4px should carry no ink');
+assert(bandInkPath(bandRect, 3, khatamPattern) === '', 'bands under 4px should carry no ink');
+
+function pointsOf(d: string): { x: number; y: number }[] {
+  const numbers = pathNumbers(d);
+  return Array.from({ length: numbers.length / 2 }, (_, index) => ({
+    x: numbers[2 * index] as number,
+    y: numbers[2 * index + 1] as number,
+  }));
+}
+
+function subpaths(pattern: Parameters<typeof bandInkPath>[2], rect = bandRect): number | undefined {
+  return bandInkPath(rect, 20, pattern).match(/M/g)?.length;
+}
+
+const tightCount = subpaths({ ...kuficPattern, density: 'tight' });
+assert(tightCount === 174, `tight kufic should have 174 subpaths, got ${tightCount}`);
+const wideCount = subpaths({ ...kuficPattern, density: 'wide' });
+assert(wideCount === 94, `wide kufic should have 94 subpaths, got ${wideCount}`);
+
+function topEdgeKeys(pattern: Parameters<typeof bandInkPath>[2], isReflected: boolean): string[] {
+  return pointsOf(bandInkPath(bandRect, 20, pattern))
+    .filter((point) => point.y < 20)
+    .map((point) => `${fmt(isReflected ? 200 - point.x : point.x)},${fmt(point.y)}`)
+    .sort();
+}
+
+const mirroredTop = topEdgeKeys({ ...kuficPattern, mirror: true }, false);
+assert(
+  mirroredTop.join('|') === topEdgeKeys({ ...kuficPattern, mirror: true }, true).join('|'),
+  'a mirrored top edge must equal its own reflection',
+);
+assert(
+  topEdgeKeys(kuficPattern, false).join('|') !== topEdgeKeys(kuficPattern, true).join('|'),
+  'an unmirrored top edge must differ from its reflection',
+);
+
+const shortRect = { x: 0, y: 0, width: 60, height: 60 };
+const shortMirrored = bandInkPath(shortRect, 20, { ...kuficPattern, mirror: true });
+assert(
+  shortMirrored === bandInkPath(shortRect, 20, kuficPattern),
+  'a lone tile must stay unmirrored',
+);
+assert(!shortMirrored.includes('NaN'), 'a short mirrored band must not contain NaN');
+
+const plainCorners = { ...kuficPattern, corner: 'none' } as const;
+const plainCount = subpaths(plainCorners);
+assert(plainCount === 110, `kufic with plain corners should have 110 subpaths, got ${plainCount}`);
+assert(
+  bandInkPath({ x: 0, y: 0, width: 40, height: 40 }, 20, plainCorners) === '',
+  'a band with no tiles and plain corners should carry no ink',
+);
+for (const corner of ['rosette', 'block'] as const) {
+  const ink = bandInkPath(bandRect, 20, { ...kuficPattern, corner });
+  assert(
+    pointsOf(ink).every((p) => p.x >= 0 && p.x <= 200 && p.y >= 0 && p.y <= 100),
+    `${corner} corners must stay inside the outer rect`,
+  );
+  assert(ink !== bandInkPath(bandRect, 20, kuficPattern), `${corner} corners must change the ink`);
+}
+
+const emptyInkOps = framePaint(
+  frameGeometry(
+    {
+      ...DEFAULT_FRAME,
+      padding: 0,
+      strokes: [
+        {
+          width: 20,
+          color: '#1a3a3f00',
+          ornament: { ...plainCorners, ink: '#c9a227' },
+        },
+      ],
+    },
+    { width: 0, height: 0 },
+  ),
+);
+assert(
+  emptyInkOps.every((op) => op.clip == null),
+  'an ornamented ring with empty ink should carry no clipped op',
+);
 
 const IMAGE = { width: 480, height: 360 };
 const plainGeometry = frameGeometry(DEFAULT_FRAME, IMAGE);

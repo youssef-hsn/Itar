@@ -1,5 +1,9 @@
 import { type Affine, type Point, toPathData, transformCommands } from '../frame.path.ts';
-import { MIN_ORNAMENT_WIDTH, type Motif } from './motif.ts';
+import type { Density, Ornament } from '../frame.schema.ts';
+import { cornerCommands } from './cornerStyle.ts';
+import { MIN_ORNAMENT_WIDTH, MOTIFS } from './motif.ts';
+
+export const DENSITY_SCALE: Record<Density, number> = { tight: 0.75, regular: 1, wide: 1.5 };
 
 export type Rect = { x: number; y: number; width: number; height: number };
 
@@ -43,36 +47,48 @@ function corners({ x, y, width, height }: Rect, t: number): Affine[] {
   ];
 }
 
-function edgeTiles(edge: Edge, t: number): Affine[] {
+function edgeTiles(edge: Edge, t: number, scale: number, isMirrored: boolean): Affine[] {
   const length = edge.side - 2 * t;
   if (length <= 0) {
     return [];
   }
 
-  const count = Math.max(1, Math.round(length / t));
+  const count = Math.max(1, Math.round(length / (t * scale)));
   const tileLength = length / count;
-  return Array.from({ length: count }, (_, index) => ({
-    origin: {
-      x: edge.origin.x + edge.along.x * tileLength * index,
-      y: edge.origin.y + edge.along.y * tileLength * index,
-    },
-    u: { x: edge.along.x * tileLength, y: edge.along.y * tileLength },
-    v: { x: edge.across.x * t, y: edge.across.y * t },
-  }));
+  return Array.from({ length: count }, (_, index) => {
+    const isFlipped = isMirrored && 2 * index > count - 1;
+    const start = isFlipped ? index + 1 : index;
+    const direction = isFlipped ? -1 : 1;
+    return {
+      origin: {
+        x: edge.origin.x + edge.along.x * tileLength * start,
+        y: edge.origin.y + edge.along.y * tileLength * start,
+      },
+      u: { x: edge.along.x * tileLength * direction, y: edge.along.y * tileLength * direction },
+      v: { x: edge.across.x * t, y: edge.across.y * t },
+    };
+  });
 }
 
-export function bandInkPath(outer: Rect, thickness: number, motif: Motif): string {
+export function bandInkPath(
+  outer: Rect,
+  thickness: number,
+  pattern: Omit<Ornament, 'ink'>,
+): string {
   if (thickness < MIN_ORNAMENT_WIDTH) {
     return '';
   }
 
+  const motif = MOTIFS[pattern.motif];
   const tile = motif.tile();
-  const corner = motif.corner();
+  const corner = cornerCommands(pattern.corner, motif);
+  const scale = DENSITY_SCALE[pattern.density];
   const tilePaths = edges(outer, thickness)
-    .flatMap((edge) => edgeTiles(edge, thickness))
+    .flatMap((edge) => edgeTiles(edge, thickness, scale, pattern.mirror))
     .map((affine) => toPathData(transformCommands(tile, affine)));
-  const cornerPaths = corners(outer, thickness).map((affine) =>
-    toPathData(transformCommands(corner, affine)),
-  );
+  const cornerPaths =
+    corner.length === 0
+      ? []
+      : corners(outer, thickness).map((affine) => toPathData(transformCommands(corner, affine)));
   return [...tilePaths, ...cornerPaths].join('');
 }
