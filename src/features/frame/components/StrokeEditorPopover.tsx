@@ -4,12 +4,28 @@ import { Button } from '#/components/ui/button.tsx';
 import { PopoverContent } from '#/components/ui/popover.tsx';
 import { Separator } from '#/components/ui/separator.tsx';
 import { cn } from '#/lib/utils.ts';
-import { DEFAULT_PATTERN, MAX_STROKE_NAME_LENGTH, type Stroke } from '../frame.schema.ts';
-import { defaultOrnamentInk, MIN_ORNAMENT_WIDTH } from '../ornament/motif.ts';
+import {
+  CORNER_STYLES,
+  DEFAULT_PATTERN,
+  DENSITIES,
+  MAX_STROKE_NAME_LENGTH,
+  type Stroke,
+} from '../frame.schema.ts';
+import { CORNER_LABELS } from '../ornament/cornerStyle.ts';
+import { defaultOrnamentInk, MIN_ORNAMENT_WIDTH, MOTIFS } from '../ornament/motif.ts';
 import { ColorField } from './ColorField.tsx';
+import { CornerTile } from './CornerTile.tsx';
 import { MotifField } from './MotifField.tsx';
 import { NumberField } from './NumberField.tsx';
+import { OptionRadioGroup } from './OptionRadioGroup.tsx';
 import { TextField } from './TextField.tsx';
+
+const CORNER_TILE_SIZE = 24;
+
+const DENSITY_OPTIONS = DENSITIES.map((density) => ({
+  value: density,
+  label: density.charAt(0).toUpperCase() + density.slice(1),
+}));
 
 type StrokeEditorPopoverProps = {
   anchor?: HTMLElement | null;
@@ -117,6 +133,52 @@ export const StrokeEditorPopover = ({
           value={ornament.ink}
           onChange={(nextInk) => onUpdate({ ornament: { ...ornament, ink: nextInk } })}
         />
+      )}
+
+      {ornament && (
+        <OptionRadioGroup
+          label="Corners"
+          options={CORNER_STYLES.map((style) => ({
+            value: style,
+            label: CORNER_LABELS[style],
+            preview: (
+              <CornerTile
+                motif={MOTIFS[ornament.motif]}
+                style={style}
+                ground={stroke.color}
+                ink={ornament.ink}
+                size={CORNER_TILE_SIZE}
+              />
+            ),
+          }))}
+          value={ornament.corner}
+          onChange={(corner) => onUpdate({ ornament: { ...ornament, corner } })}
+          columns={4}
+        />
+      )}
+
+      {ornament && (
+        <OptionRadioGroup
+          label="Density"
+          options={DENSITY_OPTIONS}
+          value={ornament.density}
+          onChange={(density) => onUpdate({ ornament: { ...ornament, density } })}
+          columns={3}
+        />
+      )}
+
+      {ornament && (
+        <Button
+          variant="outline"
+          aria-pressed={ornament.mirror}
+          onClick={() => onUpdate({ ornament: { ...ornament, mirror: !ornament.mirror } })}
+          className={cn(
+            'justify-center',
+            ornament.mirror ? 'border-primary text-foreground' : 'text-muted-foreground',
+          )}
+        >
+          Mirror at center
+        </Button>
       )}
 
       {ornament && stroke.width < MIN_ORNAMENT_WIDTH && (
