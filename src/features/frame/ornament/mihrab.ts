@@ -1,4 +1,4 @@
-import { type PathCommand, polygonCommands } from '../frame.path.ts';
+import type { PathCommand } from '../frame.path.ts';
 import type { Motif } from './motif.ts';
 
 function arch(): PathCommand[] {
@@ -12,18 +12,21 @@ function arch(): PathCommand[] {
   ];
 }
 
-function diamond(): PathCommand[] {
-  return polygonCommands([
-    { x: 0.5, y: 0.15 },
-    { x: 0.85, y: 0.5 },
-    { x: 0.5, y: 0.85 },
-    { x: 0.15, y: 0.5 },
-  ]);
+function cornerArch(): PathCommand[] {
+  return [
+    { op: 'M', to: { x: 0.88, y: 0.88 } },
+    { op: 'L', to: { x: 0.4, y: 0.88 } },
+    { op: 'L', to: { x: 0.4, y: 0.7 } },
+    { op: 'Q', c: { x: 0.4, y: 0.3 }, to: { x: 0.15, y: 0.15 } },
+    { op: 'Q', c: { x: 0.3, y: 0.4 }, to: { x: 0.7, y: 0.4 } },
+    { op: 'L', to: { x: 0.88, y: 0.4 } },
+    { op: 'Z' },
+  ];
 }
 
 export const mihrab: Motif = {
   id: 'mihrab',
   label: 'Arches',
   tile: arch,
-  corner: diamond,
+  corner: cornerArch,
 };

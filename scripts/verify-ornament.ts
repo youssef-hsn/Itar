@@ -73,6 +73,47 @@ for (const motif of Object.values(MOTIFS)) {
   }
 }
 
+const SEAMS: Record<string, [number, number][]> = {
+  khatam: [],
+  interlace: [
+    [0.15, 0.35],
+    [0.65, 0.85],
+  ],
+  kufic: [[0.85, 1]],
+  mihrab: [],
+};
+
+function hasPoint(points: { x: number; y: number }[], x: number, y: number): boolean {
+  return points.some((point) => Math.abs(point.x - x) < 1e-6 && Math.abs(point.y - y) < 1e-6);
+}
+
+function sortedKeys(points: { x: number; y: number }[]): string[] {
+  return points.map((point) => `${point.x.toFixed(6)},${point.y.toFixed(6)}`).sort();
+}
+
+for (const motif of Object.values(MOTIFS)) {
+  const tilePoints = motif.tile().flatMap(commandPoints);
+  const cornerPoints = motif.corner().flatMap(commandPoints);
+  const transposed = cornerPoints.map((point) => ({ x: point.y, y: point.x }));
+  assert(
+    sortedKeys(cornerPoints).join('|') === sortedKeys(transposed).join('|'),
+    `${motif.id} corner must be symmetric about the diagonal`,
+  );
+  for (const [a, b] of SEAMS[motif.id] ?? []) {
+    assert(
+      hasPoint(tilePoints, 0, a) &&
+        hasPoint(tilePoints, 0, b) &&
+        hasPoint(tilePoints, 1, a) &&
+        hasPoint(tilePoints, 1, b) &&
+        hasPoint(cornerPoints, 1, a) &&
+        hasPoint(cornerPoints, 1, b) &&
+        hasPoint(cornerPoints, a, 1) &&
+        hasPoint(cornerPoints, b, 1),
+      `${motif.id} corner must meet the ${a}–${b} seam`,
+    );
+  }
+}
+
 const bandRect = { x: 0, y: 0, width: 200, height: 100 };
 const starBand = bandInkPath(bandRect, 20, MOTIFS.khatam);
 
@@ -85,7 +126,7 @@ assert(
 );
 
 const kuficMoves = bandInkPath(bandRect, 20, MOTIFS.kufic).match(/M/g)?.length;
-assert(kuficMoves === 130, `kufic band should have 130 subpaths, got ${kuficMoves}`);
+assert(kuficMoves === 134, `kufic band should have 134 subpaths, got ${kuficMoves}`);
 
 assert(bandInkPath(bandRect, 3, MOTIFS.khatam) === '', 'bands under 4px should carry no ink');
 
