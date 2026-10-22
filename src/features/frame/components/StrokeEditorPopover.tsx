@@ -17,6 +17,8 @@ import { TextField } from './TextField.tsx';
 
 const CORNER_TILE_SIZE = 24;
 
+const NOOP = () => {};
+
 const DENSITY_OPTIONS = DENSITIES.map((density) => ({
   value: density,
   label: density.charAt(0).toUpperCase() + density.slice(1),
@@ -119,6 +121,8 @@ export const StrokeEditorPopover = ({
         ground={stroke.color}
         ink={ink}
         onChange={(motif) => onUpdate({ ornament: withMotif(ornament, motif, ink) })}
+        onPreview={NOOP}
+        onPreviewEnd={NOOP}
       />
 
       {ornament && (
