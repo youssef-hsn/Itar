@@ -4,6 +4,7 @@ import { frameCss, frameMatCss } from '../src/features/frame/frame.css.ts';
 import { frameGeometry } from '../src/features/frame/frame.geometry.ts';
 import {
   DEFAULT_FRAME,
+  DEFAULT_PATTERN,
   frameSchema,
   MOTIF_IDS,
   PRESETS,
@@ -77,7 +78,7 @@ assert(
 );
 
 assert(
-  decodeFrame('4.24.f7f4ec.0~16-1a3a3f') === null,
+  decodeFrame('5.24.f7f4ec.0~16-1a3a3f') === null,
   'unknown codec versions should be rejected',
 );
 
@@ -188,7 +189,11 @@ assert(
 const ornateFrame = {
   ...DEFAULT_FRAME,
   strokes: [
-    { width: 16, color: '#1a3a3f', ornament: { motif: 'khatam' as const, ink: '#c9a227' } },
+    {
+      width: 16,
+      color: '#1a3a3f',
+      ornament: { ...DEFAULT_PATTERN, motif: 'khatam' as const, ink: '#c9a227' },
+    },
     { width: 4, color: '#c9a227', name: 'Gilt' },
   ],
 };
@@ -198,8 +203,60 @@ verifyRoundTrip('ornate frame', ornateFrame);
 for (const id of MOTIF_IDS) {
   verifyRoundTrip(`${id} ornament`, {
     ...DEFAULT_FRAME,
-    strokes: [{ width: 16, color: '#1a3a3f', ornament: { motif: id, ink: '#c9a227' } }],
+    strokes: [
+      { width: 16, color: '#1a3a3f', ornament: { ...DEFAULT_PATTERN, motif: id, ink: '#c9a227' } },
+    ],
   });
+}
+
+const patternedFrame = {
+  ...DEFAULT_FRAME,
+  strokes: [
+    {
+      width: 16,
+      color: '#1a3a3f',
+      ornament: {
+        ...DEFAULT_PATTERN,
+        motif: 'kufic' as const,
+        ink: '#c9a227',
+        corner: 'rosette' as const,
+        density: 'wide' as const,
+        mirror: true,
+      },
+    },
+  ],
+};
+assert(
+  encodeFrame(patternedFrame).includes('*qc9a227:rw1'),
+  'pattern options should encode as a : suffix',
+);
+assert(
+  encodeFrame(patternedFrame).startsWith('4.'),
+  'a pattern suffix should raise the codec to v4',
+);
+verifyRoundTrip('patterned frame', patternedFrame);
+
+const legacyOrnate = decodeFrame('3.24.f7f4ec.0~16-1a3a3f*kc9a227~4-c9a227!Gilt');
+assert(
+  JSON.stringify(legacyOrnate?.strokes[0]?.ornament) ===
+    JSON.stringify({ motif: 'khatam', ink: '#c9a227', ...DEFAULT_PATTERN }),
+  'v3 ornaments should decode with the default pattern options',
+);
+assert(
+  legacyOrnate !== null &&
+    encodeFrame(legacyOrnate) === '3.24.f7f4ec.0~16-1a3a3f*kc9a227~4-c9a227!Gilt',
+  'v3 links should re-encode unchanged',
+);
+assert(
+  decodeFrame('3.24.f7f4ec.0~16-1a3a3f*kc9a227:rw1')?.strokes[0]?.ornament?.corner === 'rosette',
+  'the pattern suffix should decode on any version',
+);
+
+for (const suffix of [':x', ':mr', ':mrq1', ':zr1', ':mrr', ':']) {
+  assert(
+    decodeFrame(`4.24.f7f4ec.0~16-1a3a3f*kc9a227${suffix}`) === null,
+    `malformed pattern suffix ${suffix} should decode to null`,
+  );
 }
 
 assert(
@@ -248,15 +305,18 @@ assert(
 );
 
 assert(
-  strokeSpecLine({ width: 24, color: '#1a3a3f', ornament: { motif: 'kufic', ink: '#c9a227' } }) ===
-    '24 px · Kufic key',
+  strokeSpecLine({
+    width: 24,
+    color: '#1a3a3f',
+    ornament: { ...DEFAULT_PATTERN, motif: 'kufic', ink: '#c9a227' },
+  }) === '24 px · Kufic key',
   'ornamented strokes should name their pattern',
 );
 assert(
   strokeSpecLine({
     width: 24,
     color: '#1a3a3f00',
-    ornament: { motif: 'kufic', ink: '#c9a227' },
+    ornament: { ...DEFAULT_PATTERN, motif: 'kufic', ink: '#c9a227' },
   }) === '24 px · Kufic key',
   'a transparent-ground ornament is a pattern, not a gap',
 );

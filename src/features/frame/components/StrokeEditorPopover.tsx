@@ -4,7 +4,7 @@ import { Button } from '#/components/ui/button.tsx';
 import { PopoverContent } from '#/components/ui/popover.tsx';
 import { Separator } from '#/components/ui/separator.tsx';
 import { cn } from '#/lib/utils.ts';
-import { MAX_STROKE_NAME_LENGTH, type Stroke } from '../frame.schema.ts';
+import { DEFAULT_PATTERN, MAX_STROKE_NAME_LENGTH, type Stroke } from '../frame.schema.ts';
 import { defaultOrnamentInk, MIN_ORNAMENT_WIDTH } from '../ornament/motif.ts';
 import { ColorField } from './ColorField.tsx';
 import { MotifField } from './MotifField.tsx';
@@ -104,7 +104,11 @@ export const StrokeEditorPopover = ({
         value={ornament?.motif ?? null}
         ground={stroke.color}
         ink={ink}
-        onChange={(motif) => onUpdate({ ornament: motif == null ? undefined : { motif, ink } })}
+        onChange={(motif) =>
+          onUpdate({
+            ornament: motif == null ? undefined : { ...DEFAULT_PATTERN, ...ornament, motif, ink },
+          })
+        }
       />
 
       {ornament && (

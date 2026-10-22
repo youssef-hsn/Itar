@@ -19,9 +19,26 @@ export const MOTIF_IDS = [
 
 export type MotifId = (typeof MOTIF_IDS)[number];
 
+export const CORNER_STYLES = ['motif', 'rosette', 'block', 'none'] as const;
+
+export type CornerStyle = (typeof CORNER_STYLES)[number];
+
+export const DENSITIES = ['tight', 'regular', 'wide'] as const;
+
+export type Density = (typeof DENSITIES)[number];
+
+export const DEFAULT_PATTERN = {
+  corner: 'motif',
+  density: 'regular',
+  mirror: false,
+} as const satisfies { corner: CornerStyle; density: Density; mirror: boolean };
+
 export const ornamentSchema = z.object({
   motif: z.enum(MOTIF_IDS),
   ink: hexColor,
+  corner: z.enum(CORNER_STYLES).default(DEFAULT_PATTERN.corner),
+  density: z.enum(DENSITIES).default(DEFAULT_PATTERN.density),
+  mirror: z.boolean().default(DEFAULT_PATTERN.mirror),
 });
 
 export type Ornament = z.infer<typeof ornamentSchema>;
@@ -121,7 +138,11 @@ export const PRESETS: Preset[] = [
       roundImage: false,
       strokes: [
         { width: 3, color: '#c9a227' },
-        { width: 28, color: '#1a3a3f', ornament: { motif: 'khatam', ink: '#c9a227' } },
+        {
+          width: 28,
+          color: '#1a3a3f',
+          ornament: { ...DEFAULT_PATTERN, motif: 'khatam', ink: '#c9a227' },
+        },
         { width: 3, color: '#c9a227' },
       ],
     },
@@ -137,7 +158,11 @@ export const PRESETS: Preset[] = [
       strokes: [
         { width: 2, color: '#1a3a3f' },
         { width: 4, color: '#f7f4ec00' },
-        { width: 24, color: '#f7f4ec', ornament: { motif: 'kufic', ink: '#1a3a3f' } },
+        {
+          width: 24,
+          color: '#f7f4ec',
+          ornament: { ...DEFAULT_PATTERN, motif: 'kufic', ink: '#1a3a3f' },
+        },
         { width: 6, color: '#1a3a3f' },
       ],
     },

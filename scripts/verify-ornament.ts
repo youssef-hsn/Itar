@@ -7,7 +7,12 @@ import {
   roundedRectPath,
   toPathData,
 } from '../src/features/frame/frame.path.ts';
-import { DEFAULT_FRAME, type Frame, type MotifId } from '../src/features/frame/frame.schema.ts';
+import {
+  DEFAULT_FRAME,
+  DEFAULT_PATTERN,
+  type Frame,
+  type MotifId,
+} from '../src/features/frame/frame.schema.ts';
 import { bandInkPath } from '../src/features/frame/ornament/band.ts';
 import { defaultOrnamentInk, MOTIFS } from '../src/features/frame/ornament/motif.ts';
 
@@ -157,7 +162,11 @@ const withRing = (ring: Frame['strokes'][number]): Frame => ({
 
 const transparentOps = framePaint(
   frameGeometry(
-    withRing({ width: 24, color: '#f7f4ec00', ornament: { motif: 'kufic', ink: '#1a3a3f' } }),
+    withRing({
+      width: 24,
+      color: '#f7f4ec00',
+      ornament: { ...DEFAULT_PATTERN, motif: 'kufic', ink: '#1a3a3f' },
+    }),
     IMAGE,
   ),
 );
@@ -171,7 +180,11 @@ assert(
 
 const thinOps = framePaint(
   frameGeometry(
-    withRing({ width: 3, color: '#1a3a3f', ornament: { motif: 'khatam', ink: '#c9a227' } }),
+    withRing({
+      width: 3,
+      color: '#1a3a3f',
+      ornament: { ...DEFAULT_PATTERN, motif: 'khatam', ink: '#c9a227' },
+    }),
     IMAGE,
   ),
 );
@@ -182,7 +195,11 @@ assert(
 );
 
 const ornateGeometry = frameGeometry(
-  withRing({ width: 24, color: '#1a3a3f', ornament: { motif: 'interlace', ink: '#c9a227' } }),
+  withRing({
+    width: 24,
+    color: '#1a3a3f',
+    ornament: { ...DEFAULT_PATTERN, motif: 'interlace', ink: '#c9a227' },
+  }),
   IMAGE,
 );
 const firstPaint = JSON.stringify(framePaint(ornateGeometry));
